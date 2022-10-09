@@ -19,20 +19,19 @@ class Tag(models.Model):
 
 class Recipe(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='recipes')
-    name = models.CharField(max_length=32)
-    picture = models.ImageField()
-    description = models.CharField(max_length=128)
-    ingredient = models.ManyToManyField(Ingredient)
-    tag = models.ManyToManyField(Tag)
-    duration = models.PositiveSmallIntegerField()
-    in_cart = models.BooleanField(default=False)
+    name = models.CharField(max_length=200)
+    image = models.ImageField(upload_to='recipes/images/', default=None, null=True)
+    text = models.CharField(max_length=128)
+    ingredients = models.ManyToManyField(Ingredient)
+    tags = models.ManyToManyField(Tag)
+    cooking_time = models.PositiveSmallIntegerField()
 
 
 class Favourite(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    recipe = models.ManyToManyField(Recipe)
+    recipes = models.ManyToManyField(Recipe)
 
 
 class Cart(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    recipe = models.ManyToManyField(Recipe)
+    recipes = models.ManyToManyField(Recipe)
