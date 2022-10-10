@@ -15,3 +15,4 @@ class User(AbstractUser):
     name = models.CharField(max_length=150)
     last_name = models.CharField(max_length=150)
     role = models.CharField(max_length=6, choices=ROLES)
+    subscriptions = models.ManyToManyField('self')
