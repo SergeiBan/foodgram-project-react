@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
-from djoser.serializers import TokenSerializer
+from djoser.serializers import UserCreateSerializer
 
 User = get_user_model()
 
@@ -11,20 +11,30 @@ class LoginSerializer(serializers.ModelSerializer):
         fields = ('email', 'password')
 
 
+class CustomUserCreateSerializer(UserCreateSerializer):
+    class Meta(UserCreateSerializer.Meta):
+        model = User
+        fields = ('email', 'username', 'first_name', 'last_name', 'password')
+
+
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         field = ('email', 'id', 'username', 'first_name', 'last_name')
 
-# class ListUserSerializer(serializers.ModelSerializer):
-#     is_subscribed = serializers.SerializerMethodField()
 
-#     class Meta:
-#         model = User
-#         fields = (
-#             'email', 'id', 'username', 'first_name', 'last_name',
-#             'is_subscribed')
-        
-#         def get_is_subscribed(self, obj):
-#             user = self.context['request'].user
-#             return obj in user.subscriptions.all()
+class ListUserSerializer(serializers.ModelSerializer):
+    is_subscribed = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = (
+            'email', 'id', 'username', 'first_name', 'last_name',
+            'is_subscribed')
+
+    def get_is_subscribed(self, obj):
+        user = self.context['request'].user
+        if user.is_authenticated:
+            return obj in user.subscriptions.all()
+        else:
+            return False

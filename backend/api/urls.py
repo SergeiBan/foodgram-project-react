@@ -8,10 +8,13 @@ app_name = 'api'
 
 router = DefaultRouter()
 router.register(r'recipes', RecipeViewSet, basename='recipe')
-router.register(r'users', UserViewSet, basename='user')
+# router.register(r'users', UserViewSet, basename='user')
 
 urlpatterns = [
-    path('auth/token/login/', views.obtain_auth_token),
+    # path('auth/token/login/', views.obtain_auth_token),
+    # path('auth/token/logout/', views.)
+    
+    path('auth/', include('djoser.urls.authtoken')),
     path('', include('djoser.urls')),
     path('', include(router.urls)),
 ]
