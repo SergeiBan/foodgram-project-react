@@ -1,9 +1,10 @@
 from rest_framework import serializers, permissions
-from recipes.models import Recipe, Ingredient, Tag, RecipeIngredient
+from recipes.models import Recipe, Ingredient, Tag, RecipeIngredient, Favorite
 import base64
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from users.serializers import UserSerializer
 
 
 User = get_user_model()
@@ -13,6 +14,21 @@ class IngredientSerializer(serializers.ModelSerializer):
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'measurement_unit')
+
+
+class RetrieveRecipeIngredientSerializer(serializers.ModelSerializer):
+    name = serializers.SerializerMethodField()
+    measurement_unit = serializers.SerializerMethodField()
+
+    class Meta:
+        model = RecipeIngredient
+        fields = ('id', 'name', 'measurement_unit', 'amount')
+
+    def get_name(self, obj):
+        return obj.ingredient.name
+
+    def get_measurement_unit(self, obj):
+        return obj.ingredient.measurement_unit
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -41,12 +57,13 @@ class RecipeIngredientSerializer(serializers.ModelSerializer):
 
 class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
-    ingredients = RecipeIngredientSerializer(many=True)
+    ingredients = RetrieveRecipeIngredientSerializer(many=True)
+    author = UserSerializer()
 
     class Meta:
         model = Recipe
         fields = (
-            'author', 'name', 'image', 'text', 'ingredients', 'tags',
+            'id', 'tags', 'author', 'ingredients', 'name', 'image', 'text',
             'cooking_time')
 
 
@@ -66,16 +83,32 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients')
         tags = validated_data.pop('tags')
 
-        new_recipe = Recipe.objects.create(author=self.context["request"].user, **validated_data)
+        new_recipe = Recipe.objects.create(
+            author=self.context["request"].user, **validated_data)
 
         for ingredient in ingredients:
             ing = ingredient.get('ingredient')
             amt = ingredient.get('amount')
-            new_ri, _ = RecipeIngredient.objects.get_or_create(ingredient=ing, amount=amt)
+            new_ri, _ = RecipeIngredient.objects.get_or_create(
+                ingredient=ing, amount=amt)
             new_recipe.ingredients.add(new_ri)
-        print(tags)
         for tag in tags:
             new_recipe.tags.add(tag)
 
         new_recipe.save()
         return new_recipe
+
+
+class FavoriteSerializer(serializers.ModelSerializer):
+    user = serializers.PrimaryKeyRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
+
+    class Meta:
+        model = Favorite
+        fields = ()
+    
+    def save(self):
+        recipe_id = self.context.get('request').parser_context.get('kwargs').get('id')
+        recipe = get_object_or_404(Recipe, pk=recipe_id)
+        new_fav, _ = Favorite.objects.get_or_create(user=self.context.get('request').user)
+        new_fav.recipes.add(recipe)
+        new_fav.save()

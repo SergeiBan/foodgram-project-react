@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+# from recipes.models import Favorite
 
 
 ROLES = (
@@ -16,4 +17,7 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150)
     first_name = models.CharField(max_length=150)
     role = models.CharField(max_length=6, choices=ROLES)
-    subscriptions = models.ManyToManyField('self')
+    subscriptions = models.ForeignKey(
+        'self', on_delete=models.SET_NULL, related_name='subs', blank=True,
+        null=True)
+    favorites = models.ForeignKey('recipes.favorite', on_delete=models.SET_NULL, related_name='users', blank=True, null=True)

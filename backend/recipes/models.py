@@ -34,8 +34,8 @@ class RecipeIngredient(models.Model):
     amount = models.PositiveSmallIntegerField()
 
 
-class Favourite(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+class Favorite(models.Model):
+    # user = models.OneToOneField(User, on_delete=models.CASCADE)
     recipes = models.ManyToManyField(Recipe)
 
 
