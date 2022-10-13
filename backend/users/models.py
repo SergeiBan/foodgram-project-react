@@ -20,4 +20,3 @@ class User(AbstractUser):
     subscriptions = models.ForeignKey(
         'self', on_delete=models.SET_NULL, related_name='subs', blank=True,
         null=True)
-    favorites = models.ForeignKey('recipes.favorite', on_delete=models.SET_NULL, related_name='users', blank=True, null=True)

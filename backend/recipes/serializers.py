@@ -100,15 +100,6 @@ class PostRecipeSerializer(serializers.ModelSerializer):
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
-    user = serializers.PrimaryKeyRelatedField(default=serializers.CurrentUserDefault(), read_only=True)
-
     class Meta:
         model = Favorite
         fields = ()
-    
-    def save(self):
-        recipe_id = self.context.get('request').parser_context.get('kwargs').get('id')
-        recipe = get_object_or_404(Recipe, pk=recipe_id)
-        new_fav, _ = Favorite.objects.get_or_create(user=self.context.get('request').user)
-        new_fav.recipes.add(recipe)
-        new_fav.save()
