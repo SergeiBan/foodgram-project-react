@@ -3,6 +3,7 @@ from django.contrib.auth.models import AbstractUser
 # from recipes.models import Favorite
 
 
+
 ROLES = (
     ('user', 'user'),
     ('admin', 'admin')
@@ -20,3 +21,4 @@ class User(AbstractUser):
     subscriptions = models.ForeignKey(
         'self', on_delete=models.SET_NULL, related_name='subs', blank=True,
         null=True)
+

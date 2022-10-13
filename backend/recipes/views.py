@@ -7,17 +7,27 @@ from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
+from core.pagination import CustomizedPagination
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
-    # serializer_class = RecipeSerializer
+    pagination_class = CustomizedPagination
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):
             return RecipeSerializer
         else:
             return PostRecipeSerializer
+    
+    def get_queryset(self):
+        is_favorited = self.request.query_params.get('is_favorited')
+        if is_favorited == '1':
+            print(is_favorited)        
+            return self.request.user.favorite.recipes.all()
+        else:
+            return Recipe.objects.all()
+    
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):

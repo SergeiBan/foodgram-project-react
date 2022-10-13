@@ -59,12 +59,19 @@ class RecipeSerializer(serializers.ModelSerializer):
     tags = TagSerializer(many=True)
     ingredients = RetrieveRecipeIngredientSerializer(many=True)
     author = UserSerializer()
+    is_favorited = serializers.SerializerMethodField()
 
     class Meta:
         model = Recipe
         fields = (
             'id', 'tags', 'author', 'ingredients', 'name', 'image', 'text',
-            'cooking_time')
+            'cooking_time', 'is_favorited')
+        
+    def get_is_favorited(self, obj):
+        user = obj.author
+        if user.favorite.recipes.filter(pk=obj.pk):
+            return True
+        return False
 
 
 class PostRecipeSerializer(serializers.ModelSerializer):
