@@ -1,8 +1,8 @@
 from rest_framework import viewsets, permissions, status
-from recipes.models import Recipe, Ingredient, Tag, Favorite
+from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
-    TagSerializer, FavoriteSerializer)
+    TagSerializer, ChooseRecipeSerializer)
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -44,30 +44,53 @@ class TagViewSet(viewsets.ReadOnlyModelViewSet):
 
 class FavoriteViewSet(viewsets.ModelViewSet):
     queryset = Favorite.objects.all()
-    serializer_class = FavoriteSerializer
+    serializer_class = ChooseRecipeSerializer
 
-    @action(detail=False, methods=['delete'])
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, pk=id)
-        favorites = get_object_or_404(Favorite, user=request.user)
-        if favorites.recipes.filter(pk=id).exists():
-            favorites.recipes.remove(recipe)
-            favorites.save()
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        else:
-            raise ValidationError('Такого рецепта в избранном нет')
+        try:
+            Favorite.objects.get(user=request.user, recipe=recipe).delete()
+        except Exception as error:
+            raise ValidationError(error)
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
     def create(self, serializer, *args, **kwargs):
         id = self.kwargs['id']
         recipe = get_object_or_404(Recipe, pk=id)
-        new_fav, _ = Favorite.objects.get_or_create(user=self.request.user)
-        if new_fav.recipes.filter(pk=id):
-            raise ValidationError('Рецепт уже добавлен в избранное')
-        new_fav.recipes.add(recipe)
-        new_fav.save()
-        return Response({
-            "id": id,
-            "name": serializer.data['name'],
-            "image": serializer.data['image'],
-            "cooking_time": serializer.data['cooking_time']
-        })
+        try:
+            Favorite.objects.create(user=self.request.user, recipe=recipe)
+        except Exception as error:
+            raise ValidationError(error)
+        # return Response({
+        #     "id": id,
+        #     "name": serializer.data['name'],
+        #     "image": serializer.data['image'],
+        #     "cooking_time": serializer.data['cooking_time']
+        # })
+        serializer = self.serializer_class(recipe)
+        return Response(serializer.data)
+
+
+class ShoppingCartViewSet(viewsets.ModelViewSet):
+    model = Recipe
+    serializer_class = ChooseRecipeSerializer
+
+    def create(self, serializer, *args, **kwargs):
+        id = self.kwargs['id']
+        recipe = get_object_or_404(Recipe, pk=id)
+        try:
+            Cart.objects.create(user=self.request.user, recipe=recipe)
+        except Exception as error:
+            raise ValidationError(error)
+        serializer = self.serializer_class(recipe)
+        return Response(serializer.data)
+
+    def delete(self, request, id):
+        recipe = get_object_or_404(Recipe, pk=id)
+        try:
+            Cart.objects.get(user=request.user, recipe=recipe).delete()
+        except Exception as error:
+            raise ValidationError(error)
+        
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -35,10 +35,22 @@ class RecipeIngredient(models.Model):
 
 
 class Favorite(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    recipes = models.ManyToManyField(Recipe)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='favorite')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'], name='favorite_user_recipe_constraint')
+        ]
 
 
 class Cart(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    recipes = models.ManyToManyField(Recipe)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart')
+    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='cart')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'], name='cart_user_recipe_constraint')
+        ]
