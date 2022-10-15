@@ -18,7 +18,6 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150)
     first_name = models.CharField(max_length=150)
     role = models.CharField(max_length=6, choices=ROLES)
-    subscriptions = models.ForeignKey(
-        'self', on_delete=models.SET_NULL, related_name='subs', blank=True,
-        null=True)
+    subscriptions = models.ManyToManyField(
+        'self', related_name='subs', blank=True, symmetrical=False)
 

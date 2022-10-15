@@ -22,8 +22,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
     
     def get_queryset(self):
         is_favorited = self.request.query_params.get('is_favorited')
+        is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
         if is_favorited == '1':
-            print(is_favorited)        
             return self.request.user.favorite.recipes.all()
         else:
             return Recipe.objects.all()
