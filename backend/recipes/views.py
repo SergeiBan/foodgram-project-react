@@ -62,12 +62,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
             Favorite.objects.create(user=self.request.user, recipe=recipe)
         except Exception as error:
             raise ValidationError(error)
-        # return Response({
-        #     "id": id,
-        #     "name": serializer.data['name'],
-        #     "image": serializer.data['image'],
-        #     "cooking_time": serializer.data['cooking_time']
-        # })
+
         serializer = self.serializer_class(recipe)
         return Response(serializer.data)
 

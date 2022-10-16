@@ -21,3 +21,16 @@ class User(AbstractUser):
     subscriptions = models.ManyToManyField(
         'self', related_name='subs', blank=True, symmetrical=False)
 
+
+class Subscribe(models.Model):
+    subscriber = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='authors')
+    author = models.ForeignKey(
+        User, on_delete=models.SET_NULL, null=True, related_name='subscribers')
+    
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['subscriber', 'author'],
+                name='subscribe_subscriber_author_constraint')
+        ]
