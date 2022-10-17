@@ -16,9 +16,10 @@ router.register(r'recipes/(?P<id>\d+)/shopping_cart', ShoppingCartViewSet, basen
 router.register(r'users/subscriptions', SubscriptionViewSet, basename='subscription')
 router.register(r'users/(?P<id>\d+)/subscribe', SubscribeUnsubscribeViewSet, basename='subscribe')
 
+
 urlpatterns = [
     path('auth/', include('djoser.urls.authtoken')),
-    
+    path('users/', UserViewSet.as_view({'get': 'list'})),
     path('', include(router.urls)),
     path('', include('djoser.urls')),
 ]
