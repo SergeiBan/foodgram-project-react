@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, mixins
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
@@ -8,11 +8,13 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from core.pagination import CustomizedPagination
+from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     queryset = Recipe.objects.all()
     pagination_class = CustomizedPagination
+    permission_classes = [AuthorOrAuthenticatedElseReadOnly]
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):
@@ -21,13 +23,26 @@ class RecipeViewSet(viewsets.ModelViewSet):
             return PostRecipeSerializer
     
     def get_queryset(self):
+        recipes = Recipe.objects.prefetch_related(
+            'tags', 'favorite', 'cart').all()
         is_favorited = self.request.query_params.get('is_favorited')
-        is_in_shopping_cart = self.request.query_params.get('is_in_shopping_cart')
+        is_in_shopping_cart = self.request.query_params.get(
+            'is_in_shopping_cart')
+        author = self.request.query_params.get('author')
+        tags = self.request.query_params.getlist('tags')
+        
         if is_favorited == '1':
-            return self.request.user.favorite.recipes.all()
-        else:
-            return Recipe.objects.all()
-    
+            recipes = recipes.filter(favorite__user=self.request.user)
+        if is_in_shopping_cart == '1':
+            recipes = recipes.filter(cart__user=self.request.user)
+        if author:
+            author = int(author)
+            recipes = recipes.filter(author=author)
+        if tags:
+            for tag in tags:
+                tag = Tag.objects.get(slug=tag).pk
+                recipes = recipes.filter(tags=tag)
+        return recipes
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -36,13 +51,28 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
 
 
-class TagViewSet(viewsets.ReadOnlyModelViewSet):
+class ListRetrieveViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
+
+
+class TagViewSet(ListRetrieveViewSet):
     permission_classes = (permissions.AllowAny,)
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
 
+class CreateDeleteViewSet(
+    mixins.CreateModelMixin,
+    mixins.DestroyModelMixin,
+    viewsets.GenericViewSet
+):
+    pass
 
-class FavoriteViewSet(viewsets.ModelViewSet):
+
+class FavoriteViewSet(CreateDeleteViewSet):
     queryset = Favorite.objects.all()
     serializer_class = ChooseRecipeSerializer
 
@@ -67,7 +97,7 @@ class FavoriteViewSet(viewsets.ModelViewSet):
         return Response(serializer.data)
 
 
-class ShoppingCartViewSet(viewsets.ModelViewSet):
+class ShoppingCartViewSet(CreateDeleteViewSet):
     model = Recipe
     serializer_class = ChooseRecipeSerializer
 
