@@ -62,7 +62,8 @@ class ChooseRecipeSerializer(serializers.ModelSerializer):
 
 
 class SubscriptionSerializer(IsSubscribed, serializers.ModelSerializer):
-    recipes = ChooseRecipeSerializer(many=True)
+    # recipes = ChooseRecipeSerializer(many=True)
+    recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
     is_subscribed = serializers.SerializerMethodField()
 
@@ -77,3 +78,10 @@ class SubscriptionSerializer(IsSubscribed, serializers.ModelSerializer):
 
     def get_recipes_count(self, obj):
         return obj.recipes.count()
+
+    def get_recipes(self, obj):
+        recipes = Recipe.objects.filter(author=obj)
+        recipes_limit = self.context['request'].query_params.get('recipes_limit')
+        if recipes_limit:
+            recipes = recipes[:int(recipes_limit)]
+        return ChooseRecipeSerializer(recipes, many=True).data

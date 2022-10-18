@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status, mixins
+from rest_framework import viewsets, permissions, status, mixins, filters
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
@@ -49,6 +49,10 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = (permissions.AllowAny,)
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
+    filter_backends = [filters.SearchFilter]
+    search_fields = ['^name']
+    
+    
 
 
 class ListRetrieveViewSet(
@@ -82,7 +86,7 @@ class FavoriteViewSet(CreateDeleteViewSet):
             Favorite.objects.get(user=request.user, recipe=recipe).delete()
         except Exception as error:
             raise ValidationError(error)
-        
+
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def create(self, serializer, *args, **kwargs):

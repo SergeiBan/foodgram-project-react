@@ -20,13 +20,6 @@ class RetrieveListCreateViewSet(
     pass
 
 
-class UserViewSet(RetrieveListCreateViewSet):
-    pagination_class = CustomizedPagination
-    permission_classes = [AuthorOrList]
-    serializer_class = UserSerializer
-    queryset = User.objects.all()
-
-
 class ListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     pass
 
@@ -36,9 +29,8 @@ class SubscriptionViewSet(ListViewSet):
     serializer_class = SubscriptionSerializer
 
     def get_queryset(self):
-        if hasattr(self.request.user, 'authors'):
-            return User.objects.filter(
-                subscribers__subscriber=self.request.user)
+        return User.objects.filter(
+            subscribers__subscriber=self.request.user)
 
 
 class CreateDeleteViewSet(
