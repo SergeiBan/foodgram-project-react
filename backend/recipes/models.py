@@ -9,11 +9,17 @@ class Ingredient(models.Model):
     name = models.CharField(max_length=32)
     measurement_unit = models.CharField(max_length=16)
 
+    def __str__(self):
+        return f'{self.name}, {self.measurement_unit}'
+
 
 class Tag(models.Model):
     name = models.CharField(max_length=32, unique=True)
     color = models.CharField(max_length=7, unique=True)
     slug = models.SlugField(max_length=16, unique=True)
+
+    def __str__(self):
+        return self.name
 
 
 class Recipe(models.Model):
@@ -32,10 +38,16 @@ class Recipe(models.Model):
     class Meta:
         ordering = ['-pub_date']
 
+    def __str__(self):
+        return self.name
+
 
 class RecipeIngredient(models.Model):
     ingredient = models.OneToOneField(Ingredient, on_delete=models.CASCADE)
     amount = models.PositiveSmallIntegerField()
+
+    def __str__(self):
+        return f'{self.ingredient.name}, {self.ingredient.measurement_unit}: {self.amount}'
 
 
 class Favorite(models.Model):
