@@ -1,4 +1,4 @@
-from rest_framework import viewsets, permissions, status, mixins, filters
+from rest_framework import viewsets, permissions, status, mixins, filters, decorators
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
@@ -9,19 +9,36 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from core.pagination import CustomizedPagination
 from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
+import io
+from django.http import FileResponse
+from weasyprint import HTML
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
+    """
+    Добавляет рецепт, получает любой рецепт и все рецепты,
+    обновляет свои рецепты и удаляет. Позволяет скачать
+    список ингредиентов.
+    """
     queryset = Recipe.objects.all()
     pagination_class = CustomizedPagination
     permission_classes = [AuthorOrAuthenticatedElseReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        new_recipe = None
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            new_recipe = serializer.save()
+        output_serializer = RecipeSerializer(data=request.data)
+        output_serializer.is_valid(raise_exception=True)
+        return Response(output_serializer.data)
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):
             return RecipeSerializer
         else:
             return PostRecipeSerializer
-    
+
     def get_queryset(self):
         recipes = Recipe.objects.prefetch_related(
             'tags', 'favorite', 'cart').all()
@@ -30,7 +47,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'is_in_shopping_cart')
         author = self.request.query_params.get('author')
         tags = self.request.query_params.getlist('tags')
-        
+
         if is_favorited == '1':
             recipes = recipes.filter(favorite__user=self.request.user)
         if is_in_shopping_cart == '1':
@@ -43,6 +60,31 @@ class RecipeViewSet(viewsets.ModelViewSet):
                 tag = Tag.objects.get(slug=tag).pk
                 recipes = recipes.filter(tags=tag)
         return recipes
+
+    @action(detail=False, url_path='download_shopping_cart')
+    def download(self, request):
+        buffer = io.BytesIO()
+
+        total = {}
+        cart_content = request.user.cart.prefetch_related(
+            'recipe__ingredients').all()
+        for cart_record in cart_content:
+            ingredients = cart_record.recipe.ingredients.all()
+            for ingredient in ingredients:
+                if total.get(ingredient.ingredient):
+                    total[ingredient.ingredient] += ingredient.amount
+                else:
+                    total[ingredient.ingredient] = ingredient.amount
+
+        html_string = '<table><tr><th>Ингредиент</th><th>Количество</th></tr>'
+        for key, val in total.items():
+            html_string += f'<tr><td>{key}:</td><td>{val}</td></tr>'
+        html_string += '</table>'
+
+        HTML(string=html_string).write_pdf(buffer)
+
+        buffer.seek(0)
+        return FileResponse(buffer, as_attachment=True, filename='Покупки.pdf')
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -65,6 +107,7 @@ class TagViewSet(ListRetrieveViewSet):
     permission_classes = (permissions.AllowAny,)
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+
 
 class CreateDeleteViewSet(
     mixins.CreateModelMixin,

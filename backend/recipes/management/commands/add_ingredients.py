@@ -1,4 +1,4 @@
-from django.core.management.base import BaseCommand, CommandError
+from django.core.management.base import BaseCommand
 from recipes.models import Ingredient
 import json
 import os
@@ -10,7 +10,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         path = os.path.join(settings.BASE_DIR, '../data')
-        # f = next(os.walk(path), (None, None, []))[2]
         f = open(os.path.join(path, 'ingredients.json'))
         data = json.load(f)
         for record in data:
