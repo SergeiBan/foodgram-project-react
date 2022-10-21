@@ -2,7 +2,7 @@ from rest_framework import viewsets, permissions, status, mixins, filters, decor
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
-    TagSerializer, ChooseRecipeSerializer)
+    TagSerializer, ChooseRecipeSerializer, PostOutputSerializer)
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -29,9 +29,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             new_recipe = serializer.save()
-        output_serializer = RecipeSerializer(data=request.data)
-        output_serializer.is_valid(raise_exception=True)
-        return Response(output_serializer.data)
+            output_serializer = PostOutputSerializer(new_recipe, context={'request': request})
+            return Response(output_serializer.data)
+        return Response(serializer.errors)
+
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):

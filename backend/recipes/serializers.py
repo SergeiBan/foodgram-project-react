@@ -71,10 +71,14 @@ class RecipeSerializer(serializers.ModelSerializer):
 
     def get_is_favorited(self, obj):
         user = self.context["request"].user
+        if not user.is_authenticated:
+            return False
         return Favorite.objects.filter(user=user, recipe=obj).exists()
 
     def get_is_in_shopping_cart(self, obj):
         user = self.context["request"].user
+        if not user.is_authenticated:
+            return False
         return Cart.objects.filter(user=user, recipe=obj).exists()
 
 
@@ -108,6 +112,61 @@ class PostRecipeSerializer(serializers.ModelSerializer):
 
         new_recipe.save()
         return new_recipe
+    
+    def update(self, instance, validated_data):
+        print(instance)
+
+        ingredients = validated_data.pop('ingredients', None)
+        tags = validated_data.pop('tags', None)
+
+        new_recipe = Recipe.objects.update(instance, **validated_data)
+
+        new_recipe.ingredients.clear()
+        for ingredient in ingredients:
+            ing = ingredient.get('ingredient')
+            amt = ingredient.get('amount')
+            new_ri, _ = RecipeIngredient.objects.get_or_create(
+                ingredient=ing, amount=amt)
+            new_recipe.ingredients.add(new_ri)
+
+        new_recipe.tags.clear()
+        for tag in tags:
+            new_recipe.tags.add(tag)
+
+        new_recipe.save()
+        return new_recipe
+
+
+class PostOutputSerializer(serializers.ModelSerializer):
+    tags = serializers.SerializerMethodField()
+    ingredients = RetrieveRecipeIngredientSerializer(many=True)
+    author = UserSerializer()
+    is_favorited = serializers.SerializerMethodField()
+    is_in_shopping_cart = serializers.SerializerMethodField()
+    image = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Recipe
+        fields = (
+            'id', 'tags', 'author', 'ingredients', 'is_favorited',
+            'is_in_shopping_cart', 'name', 'image', 'text',
+            'cooking_time')
+
+    def get_is_favorited(self, obj):
+        user = obj.author
+        return Favorite.objects.filter(user=user, recipe=obj).exists()
+
+    def get_is_in_shopping_cart(self, obj):
+        user = obj.author
+        return Cart.objects.filter(user=user, recipe=obj).exists()
+
+    def get_tags(self, obj):
+        tags = Tag.objects.filter(id__in=obj.tags.all())
+        serializer = TagSerializer(tags, many=True)
+        return serializer.data
+
+    def get_image(self, obj):
+        return str(obj.image)
 
 
 class ChooseRecipeSerializer(serializers.ModelSerializer):
