@@ -27,12 +27,20 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         new_recipe = None
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            new_recipe = serializer.save()
-            output_serializer = PostOutputSerializer(new_recipe, context={'request': request})
-            return Response(output_serializer.data)
-        return Response(serializer.errors)
+        serializer.is_valid(raise_exception=True)
+        new_recipe = serializer.save()
+        output_serializer = PostOutputSerializer(
+            new_recipe, context={'request': request})
+        return Response(output_serializer.data)
 
+    def update(self, request, *args, **kwargs):
+        recipe = get_object_or_404(Recipe, pk=kwargs['pk'])
+        serializer = self.get_serializer(recipe, data=request.data)
+        serializer.is_valid(raise_exception=True)
+        new_recipe = serializer.save()
+        output_serializer = PostOutputSerializer(
+            new_recipe, context={'request': request})
+        return Response(output_serializer.data)
 
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):

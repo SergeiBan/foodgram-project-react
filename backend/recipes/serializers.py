@@ -1,4 +1,4 @@
-from rest_framework import serializers, permissions
+from rest_framework import serializers, permissions, exceptions
 from recipes.models import Recipe, Ingredient, Tag, RecipeIngredient, Favorite, Cart
 import base64
 from django.core.files.base import ContentFile
@@ -112,29 +112,37 @@ class PostRecipeSerializer(serializers.ModelSerializer):
 
         new_recipe.save()
         return new_recipe
-    
+
     def update(self, instance, validated_data):
-        print(instance)
+        # if len(validated_data) < 6:
+        #     raise exceptions.ValidationError('Неполный набор полей')
 
         ingredients = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)
 
-        new_recipe = Recipe.objects.update(instance, **validated_data)
+        try:
+            instance.author = instance.author
+            instance.image = validated_data['image']
+            instance.name = validated_data['name']
+            instance.text = validated_data['text']
+            instance.cooking_time = validated_data['cooking_time']
 
-        new_recipe.ingredients.clear()
-        for ingredient in ingredients:
-            ing = ingredient.get('ingredient')
-            amt = ingredient.get('amount')
-            new_ri, _ = RecipeIngredient.objects.get_or_create(
-                ingredient=ing, amount=amt)
-            new_recipe.ingredients.add(new_ri)
+            instance.ingredients.clear()
+            for ingredient in ingredients:
+                ing = ingredient.get('ingredient')
+                amt = ingredient.get('amount')
+                new_ri, _ = RecipeIngredient.objects.get_or_create(
+                    ingredient=ing, amount=amt)
+                instance.ingredients.add(new_ri)
 
-        new_recipe.tags.clear()
-        for tag in tags:
-            new_recipe.tags.add(tag)
+            instance.tags.clear()
+            for tag in tags:
+                instance.tags.add(tag)
 
-        new_recipe.save()
-        return new_recipe
+            instance.save()
+        except Exception as error:
+            raise exceptions.ValidationError(error)
+        return instance
 
 
 class PostOutputSerializer(serializers.ModelSerializer):
