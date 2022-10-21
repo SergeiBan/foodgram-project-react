@@ -12,8 +12,10 @@ from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
 import io
 from django.http import FileResponse
 from weasyprint import HTML
+from django.db import transaction
 
 
+# @transaction.atomic
 class RecipeViewSet(viewsets.ModelViewSet):
     """
     Добавляет рецепт, получает любой рецепт и все рецепты,
