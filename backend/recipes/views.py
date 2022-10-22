@@ -2,13 +2,13 @@ from rest_framework import viewsets, permissions, status, mixins, filters, decor
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
-    TagSerializer, ChooseRecipeSerializer, PostOutputSerializer)
+    TagSerializer, ChooseRecipeSerializer)
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from core.pagination import CustomizedPagination
-from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
+from recipes.permissions import AuthorOrAuthenticatedElseReadOnly, AdminOnlyUnsafe
 import io
 from django.http import FileResponse
 from weasyprint import HTML
@@ -31,7 +31,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         new_recipe = serializer.save()
-        output_serializer = PostOutputSerializer(
+        output_serializer = RecipeSerializer(
             new_recipe, context={'request': request})
         return Response(output_serializer.data)
 
@@ -40,7 +40,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(recipe, data=request.data)
         serializer.is_valid(raise_exception=True)
         new_recipe = serializer.save()
-        output_serializer = PostOutputSerializer(
+        output_serializer = RecipeSerializer(
             new_recipe, context={'request': request})
         return Response(output_serializer.data)
 

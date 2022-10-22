@@ -6,4 +6,5 @@ class AdminForm(forms.ModelForm):
     class Meta:
         model = get_user_model()
         fields = (
-            'username', 'password', 'email', 'first_name', 'last_name')
+            'username', 'password', 'email', 'first_name', 'last_name',
+            'is_active')

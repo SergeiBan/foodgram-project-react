@@ -18,7 +18,7 @@ class RecipeAdmin(admin.ModelAdmin):
 
     def favorite_count(self, obj):
         return Favorite.objects.filter(recipe=obj).count()
-    
+
     def get_fields(self, request, obj=None):
         if obj:
             fields = super().get_fields(request, obj=obj)

@@ -19,6 +19,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class RetrieveRecipeIngredientSerializer(serializers.ModelSerializer):
     name = serializers.SerializerMethodField()
     measurement_unit = serializers.SerializerMethodField()
+    id = serializers.SerializerMethodField()
 
     class Meta:
         model = RecipeIngredient
@@ -29,6 +30,9 @@ class RetrieveRecipeIngredientSerializer(serializers.ModelSerializer):
 
     def get_measurement_unit(self, obj):
         return obj.ingredient.measurement_unit
+
+    def get_id(self, obj):
+        return obj.ingredient.id
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -143,38 +147,6 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         except Exception as error:
             raise exceptions.ValidationError(error)
         return instance
-
-
-class PostOutputSerializer(serializers.ModelSerializer):
-    tags = serializers.SerializerMethodField()
-    ingredients = RetrieveRecipeIngredientSerializer(many=True)
-    author = UserSerializer()
-    is_favorited = serializers.SerializerMethodField()
-    is_in_shopping_cart = serializers.SerializerMethodField()
-    image = serializers.SerializerMethodField()
-
-    class Meta:
-        model = Recipe
-        fields = (
-            'id', 'tags', 'author', 'ingredients', 'is_favorited',
-            'is_in_shopping_cart', 'name', 'image', 'text',
-            'cooking_time')
-
-    def get_is_favorited(self, obj):
-        user = obj.author
-        return Favorite.objects.filter(user=user, recipe=obj).exists()
-
-    def get_is_in_shopping_cart(self, obj):
-        user = obj.author
-        return Cart.objects.filter(user=user, recipe=obj).exists()
-
-    def get_tags(self, obj):
-        tags = Tag.objects.filter(id__in=obj.tags.all())
-        serializer = TagSerializer(tags, many=True)
-        return serializer.data
-
-    def get_image(self, obj):
-        return str(obj.image)
 
 
 class ChooseRecipeSerializer(serializers.ModelSerializer):
