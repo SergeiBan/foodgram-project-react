@@ -19,6 +19,8 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='user',
             name='subscriptions',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='subs', to=settings.AUTH_USER_MODEL),
+            field=models.ForeignKey(
+                blank=True, null=True,
+                on_delete=django.db.models.deletion.SET_NULL, related_name='subs', to=settings.AUTH_USER_MODEL),
         ),
     ]

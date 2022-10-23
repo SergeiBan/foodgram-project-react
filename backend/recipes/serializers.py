@@ -1,5 +1,6 @@
-from rest_framework import serializers, permissions, exceptions
-from recipes.models import Recipe, Ingredient, Tag, RecipeIngredient, Favorite, Cart
+from rest_framework import serializers, exceptions
+from recipes.models import (
+    Recipe, Ingredient, Tag, RecipeIngredient, Favorite, Cart)
 import base64
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
@@ -118,9 +119,6 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         return new_recipe
 
     def update(self, instance, validated_data):
-        # if len(validated_data) < 6:
-        #     raise exceptions.ValidationError('Неполный набор полей')
-
         ingredients = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)
 

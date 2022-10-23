@@ -1,11 +1,10 @@
-from rest_framework import viewsets, permissions, mixins, exceptions, status
+from rest_framework import viewsets, mixins, exceptions, status
 from django.contrib.auth import get_user_model
-from users.serializers import UserSerializer, SubscriptionSerializer
+from users.serializers import SubscriptionSerializer
 from core.pagination import CustomizedPagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from users.models import Subscribe
-from users.permissions import AuthorOrList
 
 
 User = get_user_model()
@@ -60,7 +59,8 @@ class SubscribeUnsubscribeViewSet(CreateDeleteViewSet):
     def delete(self, request, id):
         try:
             author = get_object_or_404(User, pk=id)
-            Subscribe.objects.get(subscriber=request.user, author=author).delete()
+            Subscribe.objects.get(
+                subscriber=request.user, author=author).delete()
         except Exception as error:
             raise exceptions.ValidationError(error)
 

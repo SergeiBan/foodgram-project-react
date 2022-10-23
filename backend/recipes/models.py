@@ -47,23 +47,31 @@ class RecipeIngredient(models.Model):
     amount = models.PositiveSmallIntegerField()
 
     def __str__(self):
-        return f'{self.ingredient.name}, {self.ingredient.measurement_unit}: {self.amount}'
+        return (
+            f'{self.ingredient.name}, {self.ingredient.measurement_unit}: '
+            f'{self.amount}'
+            )
 
 
 class Favorite(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='favorite')
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='favorite')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='favorite')
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='favorite')
 
     class Meta:
         constraints = [
             models.UniqueConstraint(
-                fields=['user', 'recipe'], name='favorite_user_recipe_constraint')
+                fields=['user', 'recipe'],
+                name='favorite_user_recipe_constraint')
         ]
 
 
 class Cart(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='cart')
-    recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE, related_name='cart')
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='cart')
+    recipe = models.ForeignKey(
+        Recipe, on_delete=models.CASCADE, related_name='cart')
 
     class Meta:
         constraints = [

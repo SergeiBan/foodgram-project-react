@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions, status, mixins, filters, decorators
+from rest_framework import (
+    viewsets, permissions, status, mixins, filters, decorators)
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
@@ -8,7 +9,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from core.pagination import CustomizedPagination
-from recipes.permissions import AuthorOrAuthenticatedElseReadOnly, AdminOnlyUnsafe
+from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
 import io
 from django.http import FileResponse
 from weasyprint import HTML
