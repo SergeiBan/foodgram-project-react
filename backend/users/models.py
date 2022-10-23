@@ -21,5 +21,9 @@ class Subscribe(models.Model):
         constraints = [
             models.UniqueConstraint(
                 fields=['subscriber', 'author'],
-                name='subscribe_subscriber_author_constraint')
+                name='subscribe_subscriber_author_constraint'),
+
+            models.CheckConstraint(
+                check=~models.Q(subscriber=models.F('author')),
+                name='no_self_subscribing')
         ]

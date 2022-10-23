@@ -173,5 +173,5 @@ class ShoppingCartViewSet(CreateDeleteViewSet):
             Cart.objects.get(user=request.user, recipe=recipe).delete()
         except Exception as error:
             raise ValidationError(error)
-        
+
         return Response(status=status.HTTP_204_NO_CONTENT)
