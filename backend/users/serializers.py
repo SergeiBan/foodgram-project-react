@@ -53,6 +53,7 @@ class ListUserSerializer(IsSubscribed, serializers.ModelSerializer):
             'is_subscribed')
 
 
+# Скопирован сюда для обхода проблем с циркулярным импортом
 class ChooseRecipeSerializer(serializers.ModelSerializer):
 
     class Meta:
