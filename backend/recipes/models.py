@@ -6,17 +6,17 @@ User = get_user_model()
 
 
 class Ingredient(models.Model):
-    name = models.CharField(max_length=32)
-    measurement_unit = models.CharField(max_length=16)
+    name = models.CharField(max_length=200)
+    measurement_unit = models.CharField(max_length=200)
 
     def __str__(self):
         return f'{self.name}, {self.measurement_unit}'
 
 
 class Tag(models.Model):
-    name = models.CharField(max_length=32, unique=True)
+    name = models.CharField(max_length=200, unique=True)
     color = models.CharField(max_length=7, unique=True)
-    slug = models.SlugField(max_length=16, unique=True)
+    slug = models.SlugField(max_length=200, unique=True)
 
     def __str__(self):
         return self.name

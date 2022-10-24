@@ -9,7 +9,7 @@ class Command(BaseCommand):
     help = 'Adds all the ingredients to DB'
 
     def handle(self, *args, **kwargs):
-        path = os.path.join(settings.BASE_DIR, '../data')
+        path = os.path.join(settings.BASE_DIR, 'data')
         f = open(os.path.join(path, 'ingredients.json'))
         data = json.load(f)
         for record in data:
