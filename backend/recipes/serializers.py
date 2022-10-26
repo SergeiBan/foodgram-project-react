@@ -4,7 +4,6 @@ from recipes.models import (
 import base64
 from django.core.files.base import ContentFile
 from django.contrib.auth import get_user_model
-from django.shortcuts import get_object_or_404
 from users.serializers import UserSerializer
 
 
@@ -51,7 +50,6 @@ class Base64ImageField(serializers.ImageField):
         return super().to_internal_value(data)
 
     def to_representation(self, value):
-        print(value, flush=True)
         return value.url
 
 

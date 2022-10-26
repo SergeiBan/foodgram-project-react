@@ -3,6 +3,7 @@ from recipes.models import Ingredient, RecipeIngredient, Recipe, Tag
 from django.contrib.auth import get_user_model
 import base64
 from django.core.files.base import ContentFile
+import random
 
 
 User = get_user_model()
@@ -49,12 +50,33 @@ class Command(BaseCommand):
         ext = format.split('/')[-1]
         data = ContentFile(base64.b64decode(imgstr), name=f'temp.{ext}')
 
-        recipe1, created = Recipe.objects.get_or_create(
-            name='Рецепт 1',
-            author=User.objects.get(pk=1),
-            image=data,
-            text='Это первый рецепт',
-            cooking_time=1
-        )
-        recipe1.tags.add(1, 2)
-        recipe1.ingredients.add(1, 2)
+        authors = [
+            User.objects.get(pk=1),
+            User.objects.get(pk=2),
+            User.objects.get(pk=3)
+        ]
+
+        recipes_data = []
+        for n in range(20):
+            author_idx = random.randint(0, len(authors) - 1)
+            recipes_data.append(Recipe(
+                name=f'Рецепт {n}',
+                author=authors[author_idx],
+                image=data,
+                text=f'Это рецепт №{n}',
+                cooking_time=author_idx))
+
+        recipes = Recipe.objects.bulk_create(recipes_data)
+        for obj in recipes:
+            obj.tags.add(1, 2)
+            obj.ingredients.add(1, 2)
+
+        # recipe1, created = Recipe.objects.get_or_create(
+        #     name='Рецепт 1',
+        #     author=User.objects.get(pk=1),
+        #     image=data,
+        #     text='Это первый рецепт',
+        #     cooking_time=1
+        # )
+        # recipe1.tags.add(1, 2)
+        # recipe1.ingredients.add(1, 2)

@@ -50,7 +50,7 @@ class RecipeIngredient(models.Model):
         return (
             f'{self.ingredient.name}, {self.ingredient.measurement_unit}: '
             f'{self.amount}'
-            )
+        )
 
 
 class Favorite(models.Model):

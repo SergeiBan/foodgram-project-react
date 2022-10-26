@@ -23,7 +23,7 @@ class Command(BaseCommand):
                 'tag': Tag,
                 'user': User
             },
-            ]
+        ]
         for perm in admin_perms_models[0]:
             for model_l, model in admin_perms_models[1].items():
 

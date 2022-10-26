@@ -1,6 +1,5 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-# from recipes.models import Favorite
 
 
 class User(AbstractUser):

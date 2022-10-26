@@ -24,6 +24,9 @@ class ListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
 
 
 class SubscriptionViewSet(ListViewSet):
+    """
+    Возвращает список подписок пользователя.
+    """
     pagination_class = CustomizedPagination
     serializer_class = SubscriptionSerializer
 
@@ -39,6 +42,9 @@ class CreateDeleteViewSet(
 
 
 class SubscribeUnsubscribeViewSet(CreateDeleteViewSet):
+    """
+    Создает и удаляет подписку.
+    """
     serializer_class = SubscriptionSerializer
 
     def get_queryset(self):
@@ -54,7 +60,7 @@ class SubscribeUnsubscribeViewSet(CreateDeleteViewSet):
             raise exceptions.ValidationError(error)
 
         serializer = self.get_serializer(author)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
         try:

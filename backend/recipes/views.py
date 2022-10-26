@@ -1,5 +1,5 @@
 from rest_framework import (
-    viewsets, permissions, status, mixins, filters, decorators)
+    viewsets, permissions, status, mixins, filters)
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
@@ -13,10 +13,9 @@ from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
 import io
 from django.http import FileResponse
 from weasyprint import HTML
-from django.db import transaction, models
+from django.db.transaction import atomic
 
 
-# @transaction.atomic
 class RecipeViewSet(viewsets.ModelViewSet):
     """
     Добавляет рецепт, получает любой рецепт и все рецепты,
@@ -26,6 +25,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     pagination_class = CustomizedPagination
     permission_classes = [AuthorOrAuthenticatedElseReadOnly]
 
+    @atomic
     def create(self, request, *args, **kwargs):
         new_recipe = None
         serializer = self.get_serializer(data=request.data)
@@ -35,6 +35,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
             new_recipe, context={'request': request})
         return Response(output_serializer.data)
 
+    @atomic
     def update(self, request, *args, **kwargs):
         recipe = get_object_or_404(Recipe, pk=kwargs['pk'])
         serializer = self.get_serializer(recipe, data=request.data)
