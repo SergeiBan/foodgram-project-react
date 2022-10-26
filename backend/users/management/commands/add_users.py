@@ -56,3 +56,12 @@ class Command(BaseCommand):
             email='c@c.ru',
             first_name='c',
             last_name='c')
+
+        User.objects.create_user(
+            username='superu',
+            password='superpass',
+            email='s@s.ru',
+            first_name='s',
+            last_name='s',
+            is_staff=True,
+            is_superuser=True)

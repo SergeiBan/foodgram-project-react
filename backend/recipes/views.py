@@ -23,7 +23,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
     обновляет свои рецепты и удаляет. Позволяет скачать
     список ингредиентов.
     """
-    queryset = Recipe.objects.all()
     pagination_class = CustomizedPagination
     permission_classes = [AuthorOrAuthenticatedElseReadOnly]
 
@@ -64,10 +63,14 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipes = recipes.filter(favorite__user=self.request.user)
         if is_in_shopping_cart == '1':
             recipes = recipes.filter(cart__user=self.request.user)
-        if author and isinstance(author, int):
-            recipes = recipes.filter(author=author)
+        if author:
+            try:
+                author = int(author)
+                recipes = recipes.filter(author=author)
+            except Exception:
+                pass
         if tags:
-            recipes = recipes.filter(tags__slug__in=tags)
+            recipes = recipes.filter(tags__slug__in=tags).distinct()
         return recipes
 
     @action(detail=False, url_path='download_shopping_cart')
@@ -89,14 +92,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         for key, val in total.items():
             html_string += f'<tr><td>{key}:</td><td>{val}</td></tr>'
         html_string += '</table>'
-
-        HTML(string=html_string).write_pdf(buffer)
-
+        try:
+            HTML(string=html_string).write_pdf(buffer)
+        except Exception as error:
+            raise ValidationError(error)
         buffer.seek(0)
         return FileResponse(buffer, as_attachment=True, filename='Покупки.pdf')
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Выводит список ингредиентов и отдельный ингредиент.
+    """
     permission_classes = (permissions.AllowAny,)
     queryset = Ingredient.objects.all()
     serializer_class = IngredientSerializer
@@ -114,6 +121,9 @@ class ListRetrieveViewSet(
 
 
 class TagViewSet(ListRetrieveViewSet):
+    """
+    Выводит список тэгов и отдельный тэг.
+    """
     permission_classes = (permissions.AllowAny,)
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
@@ -129,6 +139,9 @@ class CreateDeleteViewSet(
 
 
 class FavoriteViewSet(CreateDeleteViewSet):
+    """
+    Добавляет и удаляет рецепт из/в избранное.
+    """
     queryset = Favorite.objects.all()
     serializer_class = ChooseRecipeSerializer
 
@@ -154,6 +167,9 @@ class FavoriteViewSet(CreateDeleteViewSet):
 
 
 class ShoppingCartViewSet(CreateDeleteViewSet):
+    """
+    Добавляет и удаляет рецепт из/в корзины.
+    """
     model = Recipe
     serializer_class = ChooseRecipeSerializer
 

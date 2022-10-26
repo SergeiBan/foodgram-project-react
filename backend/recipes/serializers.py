@@ -120,7 +120,7 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         for tag in tags:
             new_recipe.tags.add(tag)
 
-        # new_recipe.save()
+        new_recipe.save()
         return new_recipe
 
     def update(self, instance, validated_data):

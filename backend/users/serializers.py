@@ -43,16 +43,6 @@ class UserSerializer(IsSubscribed, serializers.ModelSerializer):
             'is_subscribed')
 
 
-class ListUserSerializer(IsSubscribed, serializers.ModelSerializer):
-    is_subscribed = serializers.SerializerMethodField()
-
-    class Meta:
-        model = User
-        fields = (
-            'email', 'id', 'username', 'first_name', 'last_name',
-            'is_subscribed')
-
-
 # Скопирован сюда для обхода проблем с циркулярным импортом
 class ChooseRecipeSerializer(serializers.ModelSerializer):
 
