@@ -17,6 +17,8 @@ class Subscribe(models.Model):
         User, on_delete=models.SET_NULL, null=True, related_name='subscribers')
 
     class Meta:
+        verbose_name = 'Подписка'
+        verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
                 fields=['subscriber', 'author'],
