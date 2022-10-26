@@ -13,7 +13,7 @@ from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
 import io
 from django.http import FileResponse
 from weasyprint import HTML
-from django.db import transaction
+from django.db import transaction, models
 
 
 # @transaction.atomic
@@ -64,13 +64,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
             recipes = recipes.filter(favorite__user=self.request.user)
         if is_in_shopping_cart == '1':
             recipes = recipes.filter(cart__user=self.request.user)
-        if author:
-            author = int(author)
+        if author and isinstance(author, int):
             recipes = recipes.filter(author=author)
         if tags:
-            for tag in tags:
-                tag = Tag.objects.get(slug=tag).pk
-                recipes = recipes.filter(tags=tag)
+            recipes = recipes.filter(tags__slug__in=tags)
         return recipes
 
     @action(detail=False, url_path='download_shopping_cart')
@@ -105,6 +102,7 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     serializer_class = IngredientSerializer
     filter_backends = [filters.SearchFilter]
     search_fields = ['^name']
+    pagination_class = None
 
 
 class ListRetrieveViewSet(
@@ -119,6 +117,7 @@ class TagViewSet(ListRetrieveViewSet):
     permission_classes = (permissions.AllowAny,)
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
+    pagination_class = None
 
 
 class CreateDeleteViewSet(

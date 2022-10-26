@@ -8,7 +8,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 SECRET_KEY = os.getenv('SECRET_KEY', default='django-insecure-t1@mwe2jcw8@+r-tw8*=mv@pr%c1jl^tl&zdr1ieq6ypvbik1b')
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS = ['*']
 
@@ -104,7 +104,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'users.User'
 
-MEDIA_URL = '/media/'
+MEDIA_URL = 'media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 REST_FRAMEWORK = {
@@ -117,7 +117,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.CustomizedPagination',
     'PAGE_SIZE': 10,
     'SEARCH_PARAM': 'name',
-    'EXCEPTION_HANDLER': 'core.exceptions.custom404_exception'
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_404exception_handler'
 }
 
 
@@ -136,7 +136,7 @@ DJOSER = {
 }
 
 CORS_ORIGIN_ALLOW_ALL = True
-CORS_URLS_REGEX = r'/api/.*$'
+CORS_URLS_REGEX = r'^/api/.*$'
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost'
 ]
