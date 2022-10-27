@@ -15,6 +15,9 @@ class Ingredient(models.Model):
     class Meta:
         verbose_name = 'Ингредиент'
         verbose_name_plural = 'Ингредиенты'
+        models.indexes = [
+            models.Index(fields=['name'])
+        ]
 
 
 class Tag(models.Model):

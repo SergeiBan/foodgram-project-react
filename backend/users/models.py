@@ -9,6 +9,11 @@ class User(AbstractUser):
     last_name = models.CharField(max_length=150)
     first_name = models.CharField(max_length=150)
 
+    class Meta:
+        models.indexes = [
+            models.Index(fields=['username'])
+        ]
+
 
 class Subscribe(models.Model):
     subscriber = models.ForeignKey(
