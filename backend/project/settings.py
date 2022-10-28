@@ -118,7 +118,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'core.pagination.CustomizedPagination',
     'PAGE_SIZE': 10,
     'SEARCH_PARAM': 'name',
-    # 'EXCEPTION_HANDLER': 'core.exceptions.custom_404exception_handler'
+    'EXCEPTION_HANDLER': 'core.exceptions.custom_404exception_handler'
 }
 
 
