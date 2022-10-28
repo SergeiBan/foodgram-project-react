@@ -64,7 +64,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if author:
             recipes = recipes.filter(author=author)
         if tags:
-            recipes = recipes.filter(tags__slug__in=tags).distinct()
+            return recipes.filter(tags__slug__in=tags).distinct()
         return recipes
 
     @action(detail=False, url_path='download_shopping_cart')
