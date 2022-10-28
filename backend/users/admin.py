@@ -11,8 +11,7 @@ class UserAdmin(admin.ModelAdmin):
     def get_form(self, request, *args, **kwargs):
         if request.user.is_superuser:
             return super().get_form(request, *args, **kwargs)
-        else:
-            return AdminForm
+        return AdminForm
 
 
 admin.site.register(User, UserAdmin)

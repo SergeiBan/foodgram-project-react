@@ -18,5 +18,4 @@ class IsSubscribed():
             user.is_authenticated and user != obj
                 and hasattr(user, 'authors')):
             return user.authors.filter(author=obj).exists()
-        else:
-            return False
+        return False

@@ -45,8 +45,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def get_serializer_class(self):
         if self.action in ('retrieve', 'list'):
             return RecipeSerializer
-        else:
-            return PostRecipeSerializer
+        return PostRecipeSerializer
 
     def get_queryset(self):
         recipes = Recipe.objects.prefetch_related(
