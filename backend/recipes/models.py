@@ -1,8 +1,8 @@
-from django.db import models
-from django.contrib.auth import get_user_model
 import io
-from weasyprint import HTML
 
+from django.contrib.auth import get_user_model
+from django.db import models
+from weasyprint import HTML
 
 User = get_user_model()
 

@@ -1,17 +1,16 @@
-from rest_framework import (
-    viewsets, permissions, status, filters)
-from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
-from recipes.serializers import (
-    PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
-    TagSerializer, ChooseRecipeSerializer, RecipeAddSerializer)
+from core.pagination import CustomizedPagination
+from django.db.transaction import atomic
+from django.http import FileResponse
 from django.shortcuts import get_object_or_404
+from recipes.mixins import CreateDeleteViewSet, ListRetrieveViewSet
+from recipes.models import Cart, Favorite, Ingredient, Recipe, Tag
+from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
+from recipes.serializers import (ChooseRecipeSerializer, IngredientSerializer,
+                                 PostRecipeSerializer, RecipeAddSerializer,
+                                 RecipeSerializer, TagSerializer)
+from rest_framework import filters, permissions, status, viewsets
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from core.pagination import CustomizedPagination
-from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
-from django.http import FileResponse
-from django.db.transaction import atomic
-from recipes.mixins import ListRetrieveViewSet, CreateDeleteViewSet
 
 
 class RecipeViewSet(viewsets.ModelViewSet):

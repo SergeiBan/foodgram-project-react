@@ -1,13 +1,11 @@
-from rest_framework import status
-from django.contrib.auth import get_user_model
-from users.serializers import SubscriptionSerializer
 from core.pagination import CustomizedPagination
-from rest_framework.response import Response
+from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.response import Response
+from users.mixins import CreateDeleteViewSet, ListViewSet
 from users.models import Subscribe
-from users.mixins import ListViewSet, CreateDeleteViewSet
-from users.serializers import SubscribeSerializer
-
+from users.serializers import SubscribeSerializer, SubscriptionSerializer
 
 User = get_user_model()
 

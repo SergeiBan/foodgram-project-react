@@ -1,9 +1,8 @@
-from django.core.management.base import BaseCommand
+from django.contrib.auth import get_user_model
 from django.contrib.auth.models import Group, Permission
 from django.contrib.contenttypes.models import ContentType
-from recipes.models import Recipe, Tag, Ingredient, RecipeIngredient
-from django.contrib.auth import get_user_model
-
+from django.core.management.base import BaseCommand
+from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 
 User = get_user_model()
 
