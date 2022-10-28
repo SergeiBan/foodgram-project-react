@@ -3,7 +3,7 @@ from rest_framework import (
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
-    TagSerializer, ChooseRecipeSerializer)
+    TagSerializer, ChooseRecipeSerializer, RecipeAddSerializer)
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -98,41 +98,35 @@ class TagViewSet(ListRetrieveViewSet):
     pagination_class = None
 
 
-class FavoriteViewSet(CreateDeleteViewSet):
+class AddRemoveRecipeViewSet(CreateDeleteViewSet):
     """
-    Добавляет и удаляет рецепт из/в избранное.
+    Добавляет и удаляет рецепт из/в избранное либо в корзину.
+    В зависимости от URL.
     """
     queryset = Favorite.objects.all()
-    serializer_class = ChooseRecipeSerializer
+    serializer_class = RecipeAddSerializer
 
     def delete(self, request, id):
+        model = Cart
+        if 'favorite' in request.get_full_path():
+            model = Favorite
+        id = self.kwargs['id']
+        serializer = self.get_serializer(data=self.request.data, context={
+            'request': self.request, 'model': model, 'id': id})
+        serializer.is_valid(raise_exception=True)
         recipe = get_object_or_404(Recipe, pk=id)
-        Favorite.objects.get(user=request.user, recipe=recipe).delete()
+        model.objects.get(user=request.user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
-    def create(self, serializer, *args, **kwargs):
+    def create(self, *args, **kwargs):
+        model = Cart
+        if 'favorite' in self.request.get_full_path():
+            model = Favorite
         id = self.kwargs['id']
+        serializer = self.get_serializer(data=self.request.data, context={
+            'request': self.request, 'model': model, 'id': id})
+        serializer.is_valid(raise_exception=True)
         recipe = get_object_or_404(Recipe, pk=id)
-        Favorite.objects.create(user=self.request.user, recipe=recipe)
-        serializer = self.serializer_class(recipe)
+        model.objects.create(user=self.request.user, recipe=recipe)
+        serializer = ChooseRecipeSerializer(recipe)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
-class ShoppingCartViewSet(CreateDeleteViewSet):
-    """
-    Добавляет и удаляет рецепт из/в корзины.
-    """
-    model = Recipe
-    serializer_class = ChooseRecipeSerializer
-
-    def create(self, serializer, *args, **kwargs):
-        id = self.kwargs['id']
-        recipe = get_object_or_404(Recipe, pk=id)
-        Cart.objects.create(user=self.request.user, recipe=recipe)
-        serializer = self.serializer_class(recipe)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-    def delete(self, request, id):
-        recipe = get_object_or_404(Recipe, pk=id)
-        Cart.objects.get(user=request.user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,7 +1,10 @@
-from rest_framework import serializers, exceptions
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer
 from recipes.models import Recipe
+from users.models import Subscribe
+from users.mixins import IsSubscribed
 
 
 User = get_user_model()
@@ -17,20 +20,6 @@ class CustomUserCreateSerializer(UserCreateSerializer):
     class Meta(UserCreateSerializer.Meta):
         model = User
         fields = ('email', 'username', 'first_name', 'last_name', 'password')
-
-
-class IsSubscribed():
-    def get_is_subscribed(self, obj):
-        user = self.context['request'].user
-        if (
-            user.is_authenticated and user != obj
-                and hasattr(user, 'authors')):
-            return user.authors.filter(author=obj).exists()
-        else:
-            return False
-
-    class Meta:
-        abstract = True
 
 
 class UserSerializer(IsSubscribed, serializers.ModelSerializer):
@@ -60,14 +49,24 @@ class SubscribeSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
         id = self.context['id']
+        method = self.context['request'].method
 
         if not User.objects.filter(pk=id).exists():
-            raise exceptions.ValidationError('Такого автора нет.')
+            raise ValidationError('Такого автора нет.')
 
-        user = self.context['user']
+        user = self.context['request'].user
         author = User.objects.get(pk=id)
         if user == author:
-            raise exceptions.ValidationError('Нельзя подписаться на себя.')
+            raise ValidationError('Нельзя быть подписанным на себя.')
+
+        is_subscribed = Subscribe.objects.filter(
+            subscriber=user, author=author).exists()
+        if method == 'POST' and is_subscribed:
+            raise ValidationError(
+                'Вы уже подписаны на этого автора.')
+        if method == 'DELETE' and not is_subscribed:
+            raise ValidationError(
+                'Вы не подписаны на этого автора.')
 
         return attrs
 
@@ -96,15 +95,3 @@ class SubscriptionSerializer(IsSubscribed, serializers.ModelSerializer):
         if recipes_limit:
             recipes = recipes[:int(recipes_limit)]
         return ChooseRecipeSerializer(recipes, many=True).data
-
-    def validate(self, attrs):
-        id = self.context['view'].kwargs.get('id')
-        if User.objects.filter(pk=id).exists():
-            author = User.objects.get(pk=id)
-            user = self.context['request'].user
-            if author == user:
-                raise exceptions.ValidationError('Нельзя подписаться на себя.')
-        else:
-            raise exceptions.ValidationError('Такого автора нет.')
-
-        return attrs

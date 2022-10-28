@@ -87,6 +87,10 @@ class Favorite(models.Model):
                 name='favorite_user_recipe_constraint')
         ]
 
+    @classmethod
+    def get_name(cls):
+        return 'Избранное'
+
 
 class Cart(models.Model):
     user = models.ForeignKey(
@@ -128,3 +132,7 @@ class Cart(models.Model):
 
         buffer.seek(0)
         return buffer
+
+    @classmethod
+    def get_name(cls):
+        return 'Корзина'

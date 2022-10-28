@@ -1,8 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 from recipes.views import (
-    RecipeViewSet, IngredientViewSet, TagViewSet, FavoriteViewSet,
-    ShoppingCartViewSet)
+    RecipeViewSet, IngredientViewSet, TagViewSet, AddRemoveRecipeViewSet)
 from users.views import SubscriptionViewSet, SubscribeUnsubscribeViewSet
 
 app_name = 'api'
@@ -12,10 +11,11 @@ router.register(r'recipes', RecipeViewSet, basename='recipe')
 router.register(r'ingredients', IngredientViewSet, basename='ingredient')
 router.register(r'tags', TagViewSet, basename='tag')
 router.register(
-    r'recipes/(?P<id>\d+)/favorite', FavoriteViewSet, basename='favorite')
+    r'recipes/(?P<id>\d+)/favorite', AddRemoveRecipeViewSet,
+    basename='add_remove_recipe')
 router.register(
-    r'recipes/(?P<id>\d+)/shopping_cart', ShoppingCartViewSet,
-    basename='shopping-cart')
+    r'recipes/(?P<id>\d+)/shopping_cart', AddRemoveRecipeViewSet,
+    basename='shopping-add_remove_recipe')
 router.register(
     r'users/subscriptions', SubscriptionViewSet, basename='subscription')
 router.register(

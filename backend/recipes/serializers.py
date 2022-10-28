@@ -1,4 +1,5 @@
-from rest_framework import serializers, exceptions
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 from recipes.models import (
     Recipe, Ingredient, Tag, RecipeIngredient, Favorite, Cart)
 import base64
@@ -157,30 +158,30 @@ class ChooseRecipeSerializer(serializers.ModelSerializer):
         fields = ('id', 'name', 'image', 'cooking_time')
     read_only = ('id', 'name', 'image', 'cooking_time')
 
+
+class RecipeAddSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Recipe
+        fields = ()
+
     def validate(self, attrs):
-        id = self.context['view'].kwargs.get('id')
-        user = self.context['request'].user
+        id = self.context['id']
         method = self.context['request'].method
+        destination = self.context['model']
+        user = self.context['request'].user
 
         if not Recipe.objects.filter(pk=id).exists():
-            raise exceptions.ValidationError('Такого рецепта нет.')
+            raise ValidationError('Такого рецепта нет.')
+
         recipe = Recipe.objects.get(pk=id)
+        is_added = destination.objects.filter(
+            user=user, recipe=recipe).exists()
+        if method == 'POST' and is_added:
+            raise ValidationError(
+                f'{destination.get_name()}: рецепт уже добавлен.')
+        if method == 'DELETE' and not is_added:
+            raise ValidationError(
+                f'{destination.get_name()}: рецепта не содержится.')
 
-        view_name = self.context['view'].__class__.__name__
-        if view_name == 'FavoriteViewSet':
-            is_favorite = Favorite.objects.filter(
-                user=user, recipe=recipe).exists()
-            if method == 'POST' and is_favorite:
-                raise exceptions.ValidationError('Рецепт уже в избранном.')
-            if method == 'DELETE' and not is_favorite:
-                raise exceptions.ValidationError(
-                    'В избранном нет такого рецепта.')
-
-        if view_name == 'ShoppingCartViewSet':
-            in_cart = Cart.objects.filter(user=user, recipe=recipe).exists()
-            if method == 'POST' and in_cart:
-                raise exceptions.ValidationError('Рецепт уже в корзине.')
-            if method == 'DELETE' and not in_cart:
-                raise exceptions.ValidationError(
-                    'В корзине нет такого рецепта.')
         return attrs
