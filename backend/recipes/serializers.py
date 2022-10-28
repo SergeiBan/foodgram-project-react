@@ -109,14 +109,16 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         new_recipe = Recipe.objects.create(
             author=self.context["request"].user, **validated_data)
 
+        new_ris = []
         for ingredient in ingredients:
             ing = ingredient.get('ingredient')
             amt = ingredient.get('amount')
-            new_ri, _ = RecipeIngredient.objects.get_or_create(
-                ingredient=ing, amount=amt)
-            new_recipe.ingredients.add(new_ri)
-        for tag in tags:
-            new_recipe.tags.add(tag)
+            new_ris.append(RecipeIngredient(ingredient=ing, amount=amt))
+
+        objs = RecipeIngredient.objects.bulk_create(new_ris)
+
+        new_recipe.tags.add(*tags)
+        new_recipe.ingredients.add(*objs)
 
         new_recipe.save()
         return new_recipe
@@ -125,28 +127,27 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         ingredients = validated_data.pop('ingredients', None)
         tags = validated_data.pop('tags', None)
 
-        try:
-            instance.author = instance.author
-            instance.image = validated_data['image']
-            instance.name = validated_data['name']
-            instance.text = validated_data['text']
-            instance.cooking_time = validated_data['cooking_time']
+        instance.author = instance.author
+        instance.image = validated_data['image']
+        instance.name = validated_data['name']
+        instance.text = validated_data['text']
+        instance.cooking_time = validated_data['cooking_time']
 
-            instance.ingredients.clear()
-            for ingredient in ingredients:
-                ing = ingredient.get('ingredient')
-                amt = ingredient.get('amount')
-                new_ri, _ = RecipeIngredient.objects.get_or_create(
-                    ingredient=ing, amount=amt)
-                instance.ingredients.add(new_ri)
+        new_ris = []
+        for ingredient in ingredients:
+            ing = ingredient.get('ingredient')
+            amt = ingredient.get('amount')
+            new_ris.append(RecipeIngredient(ingredient=ing, amount=amt))
 
-            instance.tags.clear()
-            for tag in tags:
-                instance.tags.add(tag)
+        objs = RecipeIngredient.objects.bulk_create(new_ris)
 
-            instance.save()
-        except Exception as error:
-            raise exceptions.ValidationError(error)
+        instance.ingredients.clear()
+        instance.ingredients.add(*objs)
+
+        instance.tags.clear()
+        instance.tags.add(*tags)
+
+        instance.save()
         return instance
 
 
@@ -155,3 +156,31 @@ class ChooseRecipeSerializer(serializers.ModelSerializer):
         model = Recipe
         fields = ('id', 'name', 'image', 'cooking_time')
     read_only = ('id', 'name', 'image', 'cooking_time')
+
+    def validate(self, attrs):
+        id = self.context['view'].kwargs.get('id')
+        user = self.context['request'].user
+        method = self.context['request'].method
+
+        if not Recipe.objects.filter(pk=id).exists():
+            raise exceptions.ValidationError('Такого рецепта нет.')
+        recipe = Recipe.objects.get(pk=id)
+
+        view_name = self.context['view'].__class__.__name__
+        if view_name == 'FavoriteViewSet':
+            is_favorite = Favorite.objects.filter(
+                user=user, recipe=recipe).exists()
+            if method == 'POST' and is_favorite:
+                raise exceptions.ValidationError('Рецепт уже в избранном.')
+            if method == 'DELETE' and not is_favorite:
+                raise exceptions.ValidationError(
+                    'В избранном нет такого рецепта.')
+
+        if view_name == 'ShoppingCartViewSet':
+            in_cart = Cart.objects.filter(user=user, recipe=recipe).exists()
+            if method == 'POST' and in_cart:
+                raise exceptions.ValidationError('Рецепт уже в корзине.')
+            if method == 'DELETE' and not in_cart:
+                raise exceptions.ValidationError(
+                    'В корзине нет такого рецепта.')
+        return attrs

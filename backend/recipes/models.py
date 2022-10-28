@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth import get_user_model
+import io
+from weasyprint import HTML
 
 
 User = get_user_model()
@@ -99,3 +101,30 @@ class Cart(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'recipe'], name='cart_user_recipe_constraint')
         ]
+
+    @classmethod
+    def get_shopping_list(cls, user):
+        """
+        Скачивает список ингредиентов для покупки.
+        """
+        buffer = io.BytesIO()
+        total = {}
+
+        cart_content = user.cart.prefetch_related(
+            'recipe__ingredients').all()
+        for cart_record in cart_content:
+            ingredients = cart_record.recipe.ingredients.all()
+            for ingredient in ingredients:
+                if total.get(ingredient.ingredient):
+                    total[ingredient.ingredient] += ingredient.amount
+                else:
+                    total[ingredient.ingredient] = ingredient.amount
+
+        html_string = '<table><tr><th>Ингредиент</th><th>Количество</th></tr>'
+        for key, val in total.items():
+            html_string += f'<tr><td>{key}:</td><td>{val}</td></tr>'
+        html_string += '</table>'
+        HTML(string=html_string).write_pdf(buffer)
+
+        buffer.seek(0)
+        return buffer

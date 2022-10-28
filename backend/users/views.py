@@ -1,26 +1,15 @@
-from rest_framework import viewsets, mixins, exceptions, status
+from rest_framework import status
 from django.contrib.auth import get_user_model
 from users.serializers import SubscriptionSerializer
 from core.pagination import CustomizedPagination
 from rest_framework.response import Response
 from django.shortcuts import get_object_or_404
 from users.models import Subscribe
+from users.mixins import ListViewSet, CreateDeleteViewSet
+from core.serializers import SubscribeSerializer
 
 
 User = get_user_model()
-
-
-class RetrieveListCreateViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    mixins.CreateModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
-
-
-class ListViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
-    pass
 
 
 class SubscriptionViewSet(ListViewSet):
@@ -35,12 +24,6 @@ class SubscriptionViewSet(ListViewSet):
             subscribers__subscriber=self.request.user)
 
 
-class CreateDeleteViewSet(
-    mixins.CreateModelMixin, mixins.DestroyModelMixin,
-        viewsets.GenericViewSet):
-    pass
-
-
 class SubscribeUnsubscribeViewSet(CreateDeleteViewSet):
     """
     Создает и удаляет подписку.
@@ -53,21 +36,16 @@ class SubscribeUnsubscribeViewSet(CreateDeleteViewSet):
         return user.authors.all()
 
     def create(self, request, id):
-        try:
-            author = get_object_or_404(User, pk=id)
-            Subscribe.objects.create(subscriber=request.user, author=author)
-        except Exception as error:
-            raise exceptions.ValidationError(error)
-
+        serializer = SubscribeSerializer(
+            data=request.data, context={'id': id, 'user': request.user})
+        serializer.is_valid(raise_exception=True)
+        author = get_object_or_404(User, pk=id)
+        Subscribe.objects.create(subscriber=request.user, author=author)
         serializer = self.get_serializer(author)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
-        try:
-            author = get_object_or_404(User, pk=id)
-            Subscribe.objects.get(
-                subscriber=request.user, author=author).delete()
-        except Exception as error:
-            raise exceptions.ValidationError(error)
-
+        author = get_object_or_404(User, pk=id)
+        Subscribe.objects.get(
+            subscriber=request.user, author=author).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)

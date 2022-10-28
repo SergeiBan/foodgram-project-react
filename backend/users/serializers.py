@@ -1,4 +1,4 @@
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer
 from recipes.models import Recipe
@@ -52,6 +52,26 @@ class ChooseRecipeSerializer(serializers.ModelSerializer):
     read_only = ('id', 'name', 'image', 'cooking_time')
 
 
+class SubscribeSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ()
+
+    def validate(self, attrs):
+        id = self.context['id']
+
+        if not User.objects.filter(pk=id).exists():
+            raise exceptions.ValidationError('Такого автора нет.')
+
+        user = self.context['user']
+        author = User.objects.get(pk=id)
+        if user == author:
+            raise exceptions.ValidationError('Нельзя подписаться на себя.')
+
+        return attrs
+
+
 class SubscriptionSerializer(IsSubscribed, serializers.ModelSerializer):
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -76,3 +96,15 @@ class SubscriptionSerializer(IsSubscribed, serializers.ModelSerializer):
         if recipes_limit:
             recipes = recipes[:int(recipes_limit)]
         return ChooseRecipeSerializer(recipes, many=True).data
+
+    def validate(self, attrs):
+        id = self.context['view'].kwargs.get('id')
+        if User.objects.filter(pk=id).exists():
+            author = User.objects.get(pk=id)
+            user = self.context['request'].user
+            if author == user:
+                raise exceptions.ValidationError('Нельзя подписаться на себя.')
+        else:
+            raise exceptions.ValidationError('Такого автора нет.')
+
+        return attrs

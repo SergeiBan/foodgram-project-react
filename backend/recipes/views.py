@@ -1,5 +1,5 @@
 from rest_framework import (
-    viewsets, permissions, status, mixins, filters)
+    viewsets, permissions, status, filters)
 from recipes.models import Recipe, Ingredient, Tag, Favorite, Cart
 from recipes.serializers import (
     PostRecipeSerializer, RecipeSerializer, IngredientSerializer,
@@ -7,13 +7,11 @@ from recipes.serializers import (
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from rest_framework.exceptions import ValidationError
 from core.pagination import CustomizedPagination
 from recipes.permissions import AuthorOrAuthenticatedElseReadOnly
-import io
 from django.http import FileResponse
-from weasyprint import HTML
 from django.db.transaction import atomic
+from recipes.mixins import ListRetrieveViewSet, CreateDeleteViewSet
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
@@ -58,6 +56,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         is_in_shopping_cart = self.request.query_params.get(
             'is_in_shopping_cart')
         author = self.request.query_params.get('author')
+        author = int(author) if author and author.isdecimal() else None
         tags = self.request.query_params.getlist('tags')
 
         if is_favorited == '1':
@@ -65,40 +64,16 @@ class RecipeViewSet(viewsets.ModelViewSet):
         if is_in_shopping_cart == '1':
             recipes = recipes.filter(cart__user=self.request.user)
         if author:
-            try:
-                author = int(author)
-                recipes = recipes.filter(author=author)
-            except Exception:
-                pass
+            recipes = recipes.filter(author=author)
         if tags:
             recipes = recipes.filter(tags__slug__in=tags).distinct()
         return recipes
 
     @action(detail=False, url_path='download_shopping_cart')
     def download(self, request):
-        buffer = io.BytesIO()
-
-        total = {}
-        cart_content = request.user.cart.prefetch_related(
-            'recipe__ingredients').all()
-        for cart_record in cart_content:
-            ingredients = cart_record.recipe.ingredients.all()
-            for ingredient in ingredients:
-                if total.get(ingredient.ingredient):
-                    total[ingredient.ingredient] += ingredient.amount
-                else:
-                    total[ingredient.ingredient] = ingredient.amount
-
-        html_string = '<table><tr><th>Ингредиент</th><th>Количество</th></tr>'
-        for key, val in total.items():
-            html_string += f'<tr><td>{key}:</td><td>{val}</td></tr>'
-        html_string += '</table>'
-        try:
-            HTML(string=html_string).write_pdf(buffer)
-        except Exception as error:
-            raise ValidationError(error)
-        buffer.seek(0)
-        return FileResponse(buffer, as_attachment=True, filename='Покупки.pdf')
+        download_data = Cart.get_shopping_list(request.user)
+        return FileResponse(
+            download_data, as_attachment=True, filename='Покупки.pdf')
 
 
 class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
@@ -113,14 +88,6 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     pagination_class = None
 
 
-class ListRetrieveViewSet(
-    mixins.ListModelMixin,
-    mixins.RetrieveModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
-
-
 class TagViewSet(ListRetrieveViewSet):
     """
     Выводит список тэгов и отдельный тэг.
@@ -129,14 +96,6 @@ class TagViewSet(ListRetrieveViewSet):
     queryset = Tag.objects.all()
     serializer_class = TagSerializer
     pagination_class = None
-
-
-class CreateDeleteViewSet(
-    mixins.CreateModelMixin,
-    mixins.DestroyModelMixin,
-    viewsets.GenericViewSet
-):
-    pass
 
 
 class FavoriteViewSet(CreateDeleteViewSet):
@@ -148,23 +107,15 @@ class FavoriteViewSet(CreateDeleteViewSet):
 
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, pk=id)
-        try:
-            Favorite.objects.get(user=request.user, recipe=recipe).delete()
-        except Exception as error:
-            raise ValidationError(error)
-
+        Favorite.objects.get(user=request.user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
     def create(self, serializer, *args, **kwargs):
         id = self.kwargs['id']
         recipe = get_object_or_404(Recipe, pk=id)
-        try:
-            Favorite.objects.create(user=self.request.user, recipe=recipe)
-        except Exception as error:
-            raise ValidationError(error)
-
+        Favorite.objects.create(user=self.request.user, recipe=recipe)
         serializer = self.serializer_class(recipe)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 
 class ShoppingCartViewSet(CreateDeleteViewSet):
@@ -177,18 +128,11 @@ class ShoppingCartViewSet(CreateDeleteViewSet):
     def create(self, serializer, *args, **kwargs):
         id = self.kwargs['id']
         recipe = get_object_or_404(Recipe, pk=id)
-        try:
-            Cart.objects.create(user=self.request.user, recipe=recipe)
-        except Exception as error:
-            raise ValidationError(error)
+        Cart.objects.create(user=self.request.user, recipe=recipe)
         serializer = self.serializer_class(recipe)
-        return Response(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
     def delete(self, request, id):
         recipe = get_object_or_404(Recipe, pk=id)
-        try:
-            Cart.objects.get(user=request.user, recipe=recipe).delete()
-        except Exception as error:
-            raise ValidationError(error)
-
+        Cart.objects.get(user=request.user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
