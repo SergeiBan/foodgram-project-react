@@ -151,6 +151,24 @@ class PostRecipeSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
 
+    def validate_ingredients(self, value):
+        all_ings = []
+        for ingredient in value:
+            ing_name = str(ingredient['ingredient'])
+            all_ings.append(ing_name)
+
+        non_unique = set([i for i in all_ings if all_ings.count(i) > 1])
+        if non_unique:
+            raise ValidationError(f'Ингредиент повторяется: {non_unique}')
+        return value
+
+    def validate_tags(self, value):
+        non_unique = set([str(t) for t in value if value.count(t) > 1])
+
+        if non_unique:
+            raise ValidationError(f'Категория повторяется: {non_unique}')
+        return value
+
 
 class ChooseRecipeSerializer(serializers.ModelSerializer):
     class Meta:
