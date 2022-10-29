@@ -22,7 +22,11 @@ class Command(BaseCommand):
 
         # ingredients = list(Ingredient.objects.all()[:10])
 
-        # for i in range(lent(list))
+        # all_recipe_ingredients = []
+        # for i in range(len(list)):
+        #     idx = random.randint(0, len(list) - 1)
+        #     all_recipe_ingredients.append(
+        #         RecipeIngredient(ingredient=ingredients[idx], amount = idx)
 
         ingredient1 = Ingredient.objects.get(pk=1)
         ingredient2 = Ingredient.objects.get(pk=2)
