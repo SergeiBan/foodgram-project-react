@@ -13,18 +13,14 @@ class Command(BaseCommand):
     help = 'Adds recipes to DB'
 
     def handle(self, *args, **kwargs):
-        Tag.objects.get_or_create(
-            name='Завтрак', color='#FFEE00',
-            slug='breakfast'
-        )
-        Tag.objects.get_or_create(
-            name='Обед', color='#EEFF00',
-            slug='dinner'
-        )
-        Tag.objects.get_or_create(
-            name='Ужин', color='#FFDDEE',
-            slug='supper'
-        )
+        all_tags = [
+            Tag(name='Завтрак', color='#FFEE00', slug='breakfast'),
+            Tag(name='Обед', color='#EEFFFF', slug='dinner'),
+            Tag(name='Ужин', color='#FFDDEE', slug='supper')
+        ]
+        Tag.objects.bulk_create(all_tags)
+
+        ingredients = []
 
         ingredient1 = Ingredient.objects.get(pk=1)
         ingredient2 = Ingredient.objects.get(pk=2)
@@ -50,11 +46,7 @@ class Command(BaseCommand):
         ext = format.split('/')[-1]
         data = ContentFile(base64.b64decode(imgstr), name=f'temp.{ext}')
 
-        authors = [
-            User.objects.get(pk=1),
-            User.objects.get(pk=2),
-            User.objects.get(pk=3)
-        ]
+        authors = list(User.objects.all())
 
         recipes_data = []
         for n in range(20):
@@ -70,13 +62,3 @@ class Command(BaseCommand):
         for obj in recipes:
             obj.tags.add(1, 2)
             obj.ingredients.add(1, 2)
-
-        # recipe1, created = Recipe.objects.get_or_create(
-        #     name='Рецепт 1',
-        #     author=User.objects.get(pk=1),
-        #     image=data,
-        #     text='Это первый рецепт',
-        #     cooking_time=1
-        # )
-        # recipe1.tags.add(1, 2)
-        # recipe1.ingredients.add(1, 2)
