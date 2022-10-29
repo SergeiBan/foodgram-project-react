@@ -20,7 +20,9 @@ class Command(BaseCommand):
         ]
         Tag.objects.bulk_create(all_tags)
 
-        # ingredients = []
+        # ingredients = list(Ingredient.objects.all()[:10])
+
+        # for i in range(lent(list))
 
         ingredient1 = Ingredient.objects.get(pk=1)
         ingredient2 = Ingredient.objects.get(pk=2)
