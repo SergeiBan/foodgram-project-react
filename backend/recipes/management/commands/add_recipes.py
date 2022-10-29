@@ -20,7 +20,7 @@ class Command(BaseCommand):
         ]
         Tag.objects.bulk_create(all_tags)
 
-        ingredients = []
+        # ingredients = []
 
         ingredient1 = Ingredient.objects.get(pk=1)
         ingredient2 = Ingredient.objects.get(pk=2)
