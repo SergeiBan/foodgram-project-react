@@ -66,5 +66,5 @@ class Command(BaseCommand):
 
         recipes = Recipe.objects.bulk_create(recipes_data)
         for obj in recipes:
-            obj.tags.add(1, 2)
+            obj.tags.add(random.randint(1, len(all_tags)), 2)
             obj.ingredients.add(1, 2)
