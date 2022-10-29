@@ -18,9 +18,7 @@ services:
       - ../.env
   
   web:
-    build:
-      context: ..
-      dockerfile: Dockerfile
+    image: sergeiban/foodgram
     container_name: web
     restart: unless-stopped
     volumes:

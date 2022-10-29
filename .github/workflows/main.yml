@@ -54,5 +54,5 @@ jobs:
           passphrase: ${{ secrets.PASSPHRASE }}
           script: |
             sudo docker pull sergeiban/foodgram
-            sudo docker stop $(sudo docker ps -a -q)
+            sudo docker stop web
             sudo docker run --rm -d -p 8000:8000 sergeiban/foodgram
