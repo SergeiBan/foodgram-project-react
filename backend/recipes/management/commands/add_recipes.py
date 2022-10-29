@@ -21,12 +21,12 @@ class Command(BaseCommand):
         Tag.objects.bulk_create(all_tags)
 
         # ingredients = list(Ingredient.objects.all()[:10])
-
         # all_recipe_ingredients = []
-        # for i in range(len(list)):
-        #     idx = random.randint(0, len(list) - 1)
+        # for i in range(len(ingredients)):
+        #     idx = random.randint(0, len(ingredients) - 1)
         #     all_recipe_ingredients.append(
-        #         RecipeIngredient(ingredient=ingredients[idx], amount = idx)
+        #         RecipeIngredient(ingredient=ingredients[idx], amount=idx))
+        # RecipeIngredient.objects.bulk_create(all_recipe_ingredients)
 
         ingredient1 = Ingredient.objects.get(pk=1)
         ingredient2 = Ingredient.objects.get(pk=2)
