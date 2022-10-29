@@ -41,18 +41,18 @@ jobs:
           push: true
           tags: sergeiban/foodgram:latest
     
-    deploy:
-      runs_on: ubuntu-latest
-      needs: build_and_push_to_docker_hub
-      steps:
-        - name: executing remote ssh commands to deploy
-          uses: appleboy/ssh-action@master
-          with:
-            host: ${{ secrets.HOST }}
-            username: ${{ secrets.USER }}
-            key: ${{ secrets.SSH_KEY }}
-            passphrase: ${{ secrets.PASSPHRASE }}
-            script: |
-              sudo docker pull sergeiban/foodgram
-              sudo docker stop $(sudo docker ps -a -q)
-              sudo docker run --rm -d -p 8000:8000 sergeiban/foodgram
+  deploy:
+    runs_on: ubuntu-latest
+    needs: build_and_push_to_docker_hub
+    steps:
+      - name: executing remote ssh commands to deploy
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.SSH_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
+          script: |
+            sudo docker pull sergeiban/foodgram
+            sudo docker stop $(sudo docker ps -a -q)
+            sudo docker run --rm -d -p 8000:8000 sergeiban/foodgram
