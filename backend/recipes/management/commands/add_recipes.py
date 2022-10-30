@@ -14,9 +14,9 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         all_tags = [
-            Tag(name='Завтрак', color='#FFEE00', slug='breakfast'),
-            Tag(name='Обед', color='#EEFFFF', slug='dinner'),
-            Tag(name='Ужин', color='#FFDDEE', slug='supper')
+            Tag(name='Завтрак', color='#66OOCC', slug='breakfast'),
+            Tag(name='Обед', color='#336600', slug='dinner'),
+            Tag(name='Ужин', color='#99004C', slug='supper')
         ]
         Tag.objects.bulk_create(all_tags)
 
@@ -28,27 +28,27 @@ class Command(BaseCommand):
         ]
         RecipeIngredient.objects.bulk_create(all_ingredients)
 
-        data = (
-            'data:image/gif;base64,R0lGODlhAQABAIAAAAAAA'
-            'P///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7')
-        format, imgstr = data.split(';base64,')
-        ext = format.split('/')[-1]
-        data = ContentFile(base64.b64decode(imgstr), name=f'temp.{ext}')
+        with open('testbase64pic.txt') as f:
+            file_data = f.read()
 
-        authors = list(User.objects.all())
+            format, imgstr = file_data.split(';base64,')
+            ext = format.split('/')[-1]
+            data = ContentFile(base64.b64decode(imgstr), name=f'temp.{ext}')
 
-        recipes_data = []
-        for n in range(20):
-            author_idx = random.randint(0, len(authors) - 1)
-            recipes_data.append(Recipe(
-                name=f'Рецепт {n}',
-                author=authors[author_idx],
-                image=data,
-                text=f'Это рецепт №{n}',
-                cooking_time=author_idx + 1))
+            authors = list(User.objects.all())
 
-        recipes = Recipe.objects.bulk_create(recipes_data)
-        for obj in recipes:
-            first_val = random.randint(1, 2)
-            obj.tags.add(first_val, 3)
-            obj.ingredients.add(first_val, 3)
+            recipes_data = []
+            for n in range(20):
+                author_idx = random.randint(0, len(authors) - 1)
+                recipes_data.append(Recipe(
+                    name=f'Рецепт {n}',
+                    author=authors[author_idx],
+                    image=data,
+                    text=f'Это рецепт №{n}',
+                    cooking_time=author_idx + 1))
+
+            recipes = Recipe.objects.bulk_create(recipes_data)
+            for obj in recipes:
+                first_val = random.randint(1, 2)
+                obj.tags.add(first_val, 3)
+                obj.ingredients.add(first_val, 3)
