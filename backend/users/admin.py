@@ -1,6 +1,5 @@
 from django.contrib import admin
 from django.contrib.auth import get_user_model
-
 from users.forms import AdminForm
 
 User = get_user_model()
