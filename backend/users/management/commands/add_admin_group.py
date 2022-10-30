@@ -28,13 +28,13 @@ class Command(BaseCommand):
 
                 ct = ContentType.objects.get_for_model(model)
 
-                # if Permission.objects.filter(
-                #         codename=f'{perm}_{model_l}').exists():
-                #     Permission.objects.filter(
-                #         codename=f'{perm}_{model_l}').delete()
+                if Permission.objects.filter(
+                        codename=f'{perm}_{model_l}').exists():
+                    Permission.objects.filter(
+                        codename=f'{perm}_{model_l}').delete()
 
                 new_perm, created = Permission.objects.get_or_create(
                     codename=f'{perm}_{model_l}', name=f'Can {perm} {model}',
                     content_type=ct)
-                new_perm.save()
+                # new_perm.save()
                 admin_group.permissions.add(new_perm)
