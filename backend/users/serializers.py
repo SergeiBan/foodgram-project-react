@@ -1,8 +1,9 @@
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserCreateSerializer
-from recipes.models import Recipe
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+from recipes.models import Recipe
 from users.mixins import IsSubscribed
 from users.models import Subscribe
 

@@ -1,8 +1,9 @@
-from core.pagination import CustomizedPagination
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.response import Response
+
+from core.pagination import CustomizedPagination
 from users.mixins import CreateDeleteViewSet, ListViewSet
 from users.models import Subscribe
 from users.serializers import SubscribeSerializer, SubscriptionSerializer
