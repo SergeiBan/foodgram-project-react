@@ -141,4 +141,6 @@ CORS_URLS_REGEX = r'^/api/.*$'
 CSRF_TRUSTED_ORIGINS = [
     'http://localhost',
     'http://51.250.89.191',
+    'http://liubliusyr.ddns.net',
+    'https://liubliusyr.ddns.net'
 ]
