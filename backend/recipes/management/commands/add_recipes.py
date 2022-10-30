@@ -20,10 +20,6 @@ class Command(BaseCommand):
         ]
         Tag.objects.bulk_create(all_tags)
 
-        # ingredient1 = Ingredient.objects.get(pk=1)
-        # ingredient2 = Ingredient.objects.get(pk=2)
-        # ingredient3 = Ingredient.objects.get(pk=3)
-
         ingredients = list(Ingredient.objects.all()[:3])
         all_ingredients = [
             RecipeIngredient(ingredient=ingredients[0], amount=10),
@@ -31,19 +27,6 @@ class Command(BaseCommand):
             RecipeIngredient(ingredient=ingredients[2], amount=30)
         ]
         RecipeIngredient.objects.bulk_create(all_ingredients)
-
-        # RecipeIngredient.objects.get_or_create(
-        #     ingredient=ingredient1,
-        #     amount=3
-        # )
-        # RecipeIngredient.objects.get_or_create(
-        #     ingredient=ingredient2,
-        #     amount=6
-        # )
-        # RecipeIngredient.objects.get_or_create(
-        #     ingredient=ingredient3,
-        #     amount=9
-        # )
 
         data = (
             'data:image/gif;base64,R0lGODlhAQABAIAAAAAAA'
@@ -70,3 +53,4 @@ class Command(BaseCommand):
             first_val = 1 if step_bool else 2
             obj.tags.add(first_val, 3)
             obj.ingredients.add(first_val, 3)
+            step_bool = not step_bool
