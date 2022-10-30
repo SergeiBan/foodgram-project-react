@@ -29,4 +29,9 @@ while ! python manage.py add_recipes 2>&1; do
     sleep 3
 done
 
+echo "Adding static files"
+while ! python manage.py collectstatic --noinput 2>&1; do
+    sleep 3
+done
+
 exec "$@"

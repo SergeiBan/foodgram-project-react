@@ -6,7 +6,6 @@ RUN apt-get update -y
 COPY ./backend/ .
 COPY ./data data/
 COPY ./docker-entrypoint.sh .
-RUN python3 manage.py collectstatic --noinput
 RUN chmod +x docker-entrypoint.sh
 ENTRYPOINT [ "/app/docker-entrypoint.sh"]
 CMD ["gunicorn", "project.wsgi:application", "--bind", "0:8000"]
