@@ -18,6 +18,7 @@ class Command(BaseCommand):
             Tag(name='Обед', color='#336600', slug='dinner'),
             Tag(name='Ужин', color='#99004C', slug='supper')
         ]
+        Tag.objects.all().delete()
         Tag.objects.bulk_create(all_tags)
 
         ingredients = list(Ingredient.objects.all()[:3])
@@ -26,6 +27,7 @@ class Command(BaseCommand):
             RecipeIngredient(ingredient=ingredients[1], amount=20),
             RecipeIngredient(ingredient=ingredients[2], amount=30)
         ]
+        RecipeIngredient.objects.all().delete()
         RecipeIngredient.objects.bulk_create(all_ingredients)
 
         with open('testbase64pic.txt') as f:
@@ -46,8 +48,9 @@ class Command(BaseCommand):
                     image=data,
                     text=f'Это рецепт №{n}',
                     cooking_time=author_idx + 1))
-
+            Recipe.objects.all().delete()
             recipes = Recipe.objects.bulk_create(recipes_data)
+
             for obj in recipes:
                 # first_val = random.randint(1, 2)
                 obj.tags.add(1, 3)
