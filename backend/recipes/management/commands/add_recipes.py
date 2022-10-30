@@ -20,17 +20,17 @@ class Command(BaseCommand):
         ]
         Tag.objects.bulk_create(all_tags)
 
-        ingredients = list(Ingredient.objects.all()[:10])
-        all_recipe_ingredients = []
-        for i in range(len(ingredients)):
-            idx = random.randint(0, len(ingredients) - 1)
-            all_recipe_ingredients.append(
-                RecipeIngredient(ingredient=ingredients[idx], amount=idx))
-        RecipeIngredient.objects.bulk_create(all_recipe_ingredients)
-
         # ingredient1 = Ingredient.objects.get(pk=1)
         # ingredient2 = Ingredient.objects.get(pk=2)
         # ingredient3 = Ingredient.objects.get(pk=3)
+
+        ingredients = list(Ingredient.objects.all()[:3])
+        all_ingredients = [
+            RecipeIngredient(ingredient=ingredients[0], amount=10),
+            RecipeIngredient(ingredient=ingredients[1], amount=20),
+            RecipeIngredient(ingredient=ingredients[2], amount=30)
+        ]
+        RecipeIngredient.objects.bulk_create(all_ingredients)
 
         # RecipeIngredient.objects.get_or_create(
         #     ingredient=ingredient1,
@@ -66,11 +66,7 @@ class Command(BaseCommand):
 
         recipes = Recipe.objects.bulk_create(recipes_data)
         for obj in recipes:
-            obj.tags.add(
-                random.randint(1, len(all_tags)),
-                random.randint(1, len(all_tags)),
-                random.randint(1, len(all_tags)))
-            obj.ingredients.add(
-                random.randint(len(all_recipe_ingredients)),
-                random.randint(len(all_recipe_ingredients)),
-                random.randint(len(all_recipe_ingredients)))
+            step_bool = False
+            first_val = 1 if step_bool else 2
+            obj.tags.add(first_val, 3)
+            obj.ingredients.add(first_val, 3)
