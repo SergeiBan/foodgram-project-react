@@ -45,12 +45,10 @@ class Command(BaseCommand):
                 author=authors[author_idx],
                 image=data,
                 text=f'Это рецепт №{n}',
-                cooking_time=author_idx))
+                cooking_time=author_idx + 1))
 
         recipes = Recipe.objects.bulk_create(recipes_data)
         for obj in recipes:
-            step_bool = True
-            first_val = 1 if step_bool else 2
+            first_val = random.randint(1, 2)
             obj.tags.add(first_val, 3)
             obj.ingredients.add(first_val, 3)
-            step_bool = not step_bool
