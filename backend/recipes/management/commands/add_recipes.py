@@ -49,7 +49,7 @@ class Command(BaseCommand):
 
         recipes = Recipe.objects.bulk_create(recipes_data)
         for obj in recipes:
-            step_bool = False
+            step_bool = True
             first_val = 1 if step_bool else 2
             obj.tags.add(first_val, 3)
             obj.ingredients.add(first_val, 3)
