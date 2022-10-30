@@ -46,15 +46,15 @@ class Command(BaseCommand):
             for n in range(20):
                 author_idx = random.randint(0, len(authors) - 1)
                 recipes_data.append(Recipe(
-                    name=f'Рецепт {n}',
+                    name=f'Рецепт {n+1}',
                     author=authors[author_idx],
                     image=data,
-                    text=f'Это рецепт №{n}',
+                    text=f'Это рецепт №{n+1}',
                     cooking_time=author_idx + 1))
             Recipe.objects.all().delete()
             recipes = Recipe.objects.bulk_create(recipes_data)
 
             for obj in recipes:
-                # first_val = random.randint(1, 2)
-                obj.tags.add(1, 3)
-                obj.ingredients.add(1, 3)
+                first_val = random.randint(1, 2)
+                obj.tags.add(first_val, 3)
+                obj.ingredients.add(first_val, 3)
