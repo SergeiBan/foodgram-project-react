@@ -10,32 +10,32 @@ class Command(BaseCommand):
     def handle(self, *args, **kwargs):
 
         User.objects.create_user(
-            username='a',
+            username='first',
             password='A12341234',
             email='a@a.ru',
-            first_name='a',
-            last_name='a'),
+            first_name='Афанасий',
+            last_name='Никитин'),
 
         User.objects.create_user(
-            username='b',
+            username='second',
             password='B12341234',
             email='b@b.ru',
-            first_name='b',
-            last_name='b'
+            first_name='Емельян',
+            last_name='Пугачёв'
         ),
 
         User.objects.create_user(
-            username='c',
+            username='third',
             password='C12341234',
             email='c@c.ru',
-            first_name='c',
-            last_name='c')
+            first_name='Евгений',
+            last_name='Петросян')
 
         User.objects.create_user(
             username='superu',
             password='superpass',
             email='s@s.ru',
-            first_name='s',
-            last_name='s',
+            first_name='Муслим',
+            last_name='Магомаев',
             is_staff=True,
             is_superuser=True)

@@ -36,5 +36,4 @@ class Command(BaseCommand):
                 new_perm, created = Permission.objects.get_or_create(
                     codename=f'{perm}_{model_l}', name=f'Can {perm} {model}',
                     content_type=ct)
-                # new_perm.save()
                 admin_group.permissions.add(new_perm)
