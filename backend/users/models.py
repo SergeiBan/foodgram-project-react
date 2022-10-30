@@ -3,11 +3,11 @@ from django.db import models
 
 
 class User(AbstractUser):
-    username = models.CharField(max_length=150, unique=True)
-    password = models.CharField(max_length=150)
-    email = models.EmailField(max_length=254)
-    last_name = models.CharField(max_length=150)
-    first_name = models.CharField(max_length=150)
+    username = models.CharField('Логин', max_length=150, unique=True)
+    password = models.CharField('Пароль', max_length=150)
+    email = models.EmailField('Почта', max_length=254)
+    last_name = models.CharField('Фамилия', max_length=150)
+    first_name = models.CharField('Имя', max_length=150)
 
     class Meta:
         models.indexes = [
@@ -17,9 +17,11 @@ class User(AbstractUser):
 
 class Subscribe(models.Model):
     subscriber = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name='authors')
+        User, verbose_name='Подписчик', on_delete=models.SET_NULL, null=True,
+        related_name='authors')
     author = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name='subscribers')
+        User, verbose_name='Автор', on_delete=models.SET_NULL, null=True,
+        related_name='subscribers')
 
     class Meta:
         verbose_name = 'Подписка'
