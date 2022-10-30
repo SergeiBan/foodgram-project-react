@@ -2,10 +2,11 @@ import base64
 
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
-from recipes.models import (Cart, Favorite, Ingredient, Recipe,
-                            RecipeIngredient, Tag)
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
+
+from recipes.models import (Cart, Favorite, Ingredient, Recipe,
+                            RecipeIngredient, Tag)
 from users.serializers import UserSerializer
 
 User = get_user_model()

@@ -1,9 +1,12 @@
 import base64
+import os
 import random
 
+from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.core.files.base import ContentFile
 from django.core.management.base import BaseCommand
+
 from recipes.models import Ingredient, Recipe, RecipeIngredient, Tag
 
 User = get_user_model()
@@ -30,7 +33,8 @@ class Command(BaseCommand):
         RecipeIngredient.objects.all().delete()
         RecipeIngredient.objects.bulk_create(all_ingredients)
 
-        with open('testbase64pic.txt') as f:
+        path = os.path.join(settings.BASE_DIR, 'data')
+        with open(os.path.join(path, 'testbase64pic.txt')) as f:
             file_data = f.read()
 
             format, imgstr = file_data.split(';base64,')
