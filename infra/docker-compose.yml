@@ -55,7 +55,7 @@ services:
     volumes:
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    command: certonly --webroot -w /var/www/certbot --renew --email s.o.banshchikov@yandex.ru -d liubliusyr.ddns.net --agree-tos
+    command: certonly --webroot -w /var/www/certbot -n --email s.o.banshchikov@yandex.ru -d liubliusyr.ddns.net --agree-tos
 volumes:
   static_value:
   media_value:
